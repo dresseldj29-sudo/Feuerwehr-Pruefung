@@ -1,85 +1,309 @@
 import express from "express";
 import cors from "cors";
-import OpenAI from "openai";
+import fs from "fs";
+import path from "path";
 import crypto from "crypto";
+import OpenAI from "openai";
+import { fileURLToPath } from "url";
 
-const app = express();
+
+/* =========================================================
+   GRUNDKONFIGURATION
+   ========================================================= */
+
+const __filename =
+    fileURLToPath(import.meta.url);
+
+const __dirname =
+    path.dirname(__filename);
+
+
+const app =
+    express();
+
 
 const PORT =
-    process.env.PORT || 3000;
+    Number(process.env.PORT || 3000);
+
+
+/*
+   DEINE WEBSITE
+
+   Beispiel:
+
+   https://dresseldj29-sudo.github.io/Feuerwehr-Pruefung/
+
+   Wenn du lokal testest, kannst du "*" verwenden.
+*/
 
 const FRONTEND_URL =
-    process.env.FRONTEND_URL ||
-    "*";
-
-const openai =
-    new OpenAI({
-        apiKey:
-            process.env.OPENAI_API_KEY
-    });
-
-
-app.use(cors({
-    origin: FRONTEND_URL === "*"
-        ? true
-        : FRONTEND_URL
-}));
-
-app.use(express.json({
-    limit: "10mb"
-}));
+    process.env.FRONTEND_URL || "*";
 
 
 /* =========================================================
-   DATEN
-========================================================= */
+   ADMIN
+   ========================================================= */
 
-const pruefungen = new Map();
-const ergebnisse = new Map();
+const ADMIN_EMAIL =
+    process.env.ADMIN_EMAIL ||
+    "Ausbilder@gmail.com";
+
+
+const ADMIN_PASSWORD =
+    process.env.ADMIN_PASSWORD ||
+    "Admin";
 
 
 /* =========================================================
-   START
-========================================================= */
+   OPENAI
+   ========================================================= */
 
-app.get("/", (req,res) => {
-
-    res.json({
-        name:
-            "Feuerwehr Prüfungsplattform API",
-
-        status:
-            "online",
-
-        version:
-            "1.0.0"
-    });
-
-});
+const OPENAI_API_KEY =
+    process.env.OPENAI_API_KEY;
 
 
-app.get(
-    "/api/gesundheit",
-    (req,res) => {
+const OPENAI_MODEL =
+    process.env.OPENAI_MODEL ||
+    "gpt-6-luna";
 
-        res.json({
-            ok: true,
-            status: "online"
+
+let openai = null;
+
+
+if(OPENAI_API_KEY){
+
+    openai =
+        new OpenAI({
+            apiKey:OPENAI_API_KEY
         });
 
-    }
+}
+
+
+/* =========================================================
+   EXPRESS
+   ========================================================= */
+
+app.use(
+    cors({
+        origin: FRONTEND_URL === "*"
+            ? true
+            : FRONTEND_URL.split(",")
+                .map(x => x.trim())
+    })
+);
+
+
+app.use(
+    express.json({
+        limit:"10mb"
+    })
 );
 
 
 /* =========================================================
-   PRÜFUNGSCODE
-========================================================= */
+   DATENBANK
+   ========================================================= */
 
-function neuerCode() {
+const DATA_FILE =
+    path.join(
+        __dirname,
+        "data.json"
+    );
+
+
+function defaultData(){
+
+    return {
+
+        pruefungen:[],
+
+        ergebnisse:[]
+
+    };
+
+}
+
+
+function ladeDaten(){
+
+    try{
+
+        if(!fs.existsSync(DATA_FILE)){
+
+            const daten =
+                defaultData();
+
+            fs.writeFileSync(
+                DATA_FILE,
+                JSON.stringify(
+                    daten,
+                    null,
+                    2
+                ),
+                "utf8"
+            );
+
+            return daten;
+
+        }
+
+
+        const text =
+            fs.readFileSync(
+                DATA_FILE,
+                "utf8"
+            );
+
+
+        const daten =
+            JSON.parse(text);
+
+
+        return {
+
+            pruefungen:
+                Array.isArray(daten.pruefungen)
+                ? daten.pruefungen
+                : [],
+
+            ergebnisse:
+                Array.isArray(daten.ergebnisse)
+                ? daten.ergebnisse
+                : []
+
+        };
+
+
+    }catch(error){
+
+        console.error(
+            "Datenbank konnte nicht geladen werden:",
+            error
+        );
+
+
+        return defaultData();
+
+    }
+
+}
+
+
+let daten =
+    ladeDaten();
+
+
+function speichereDaten(){
+
+    const tempFile =
+        DATA_FILE + ".tmp";
+
+
+    fs.writeFileSync(
+        tempFile,
+        JSON.stringify(
+            daten,
+            null,
+            2
+        ),
+        "utf8"
+    );
+
+
+    fs.renameSync(
+        tempFile,
+        DATA_FILE
+    );
+
+}
+
+
+/* =========================================================
+   AUTHENTIFIZIERUNG
+   ========================================================= */
+
+const adminSessions =
+    new Map();
+
+
+function erstelleToken(){
+
+    return crypto
+        .randomBytes(32)
+        .toString("hex");
+
+}
+
+
+function adminErforderlich(
+    req,
+    res,
+    next
+){
+
+    const header =
+        req.headers.authorization || "";
+
+
+    const token =
+        header.startsWith("Bearer ")
+        ? header.slice(7)
+        : "";
+
+
+    if(
+        !token ||
+        !adminSessions.has(token)
+    ){
+
+        return res
+            .status(401)
+            .json({
+                error:"Nicht autorisiert."
+            });
+
+    }
+
+
+    next();
+
+}
+
+
+/* =========================================================
+   HILFSFUNKTIONEN
+   ========================================================= */
+
+function neueID(prefix){
+
+    return (
+        prefix +
+        "_" +
+        crypto
+            .randomBytes(10)
+            .toString("hex")
+    );
+
+}
+
+
+function normalisiereCode(code){
+
+    return String(code || "")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9-]/g,"");
+
+}
+
+
+function neuerPruefungscode(){
 
     let code;
 
-    do {
+
+    do{
 
         code =
             "FW-" +
@@ -88,129 +312,448 @@ function neuerCode() {
                 .substring(2,7)
                 .toUpperCase();
 
-    } while (pruefungen.has(code));
+    }while(
+        daten.pruefungen.some(
+            p => p.code === code
+        )
+    );
+
 
     return code;
 
 }
 
 
+function findePruefung(code){
+
+    return daten.pruefungen.find(
+        p =>
+            p.code ===
+            normalisiereCode(code)
+    );
+
+}
+
+
+function clamp(
+    value,
+    min,
+    max
+){
+
+    return Math.min(
+        max,
+        Math.max(
+            min,
+            Number(value)
+        )
+    );
+
+}
+
+
 /* =========================================================
-   KI
-========================================================= */
+   HEALTH
+   ========================================================= */
+
+app.get(
+    "/",
+    (req,res) => {
+
+        res.json({
+
+            name:
+                "Feuerwehr Prüfungsplattform",
+
+            status:
+                "online",
+
+            ki:
+                Boolean(openai),
+
+            version:
+                "3.0"
+
+        });
+
+    }
+);
+
+
+app.get(
+    "/api/gesundheit",
+    (req,res) => {
+
+        res.json({
+
+            ok:true,
+
+            ki:
+                Boolean(openai),
+
+            pruefungen:
+                daten.pruefungen.length,
+
+            ergebnisse:
+                daten.ergebnisse.length
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN LOGIN
+   ========================================================= */
 
 app.post(
-    "/api/ki/pruefung",
+    "/api/admin/login",
+    (req,res) => {
+
+        const {
+            email,
+            password
+        } = req.body || {};
+
+
+        if(
+            email !== ADMIN_EMAIL ||
+            password !== ADMIN_PASSWORD
+        ){
+
+            return res
+                .status(401)
+                .json({
+                    error:
+                        "E-Mail oder Passwort ist falsch."
+                });
+
+        }
+
+
+        const token =
+            erstelleToken();
+
+
+        adminSessions.set(
+            token,
+            {
+                email,
+                createdAt:
+                    Date.now()
+            }
+        );
+
+
+        res.json({
+
+            ok:true,
+
+            token
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN DASHBOARD
+   ========================================================= */
+
+app.get(
+    "/api/admin/dashboard",
+    adminErforderlich,
+    (req,res) => {
+
+        const gesamt =
+            daten.ergebnisse.length;
+
+
+        const bestanden =
+            daten.ergebnisse.filter(
+                r => r.bestanden
+            ).length;
+
+
+        const quote =
+            gesamt === 0
+            ? 0
+            : Math.round(
+                bestanden /
+                gesamt *
+                100
+            );
+
+
+        res.json({
+
+            pruefungen:
+                daten.pruefungen.length,
+
+            ergebnisse:
+                gesamt,
+
+            bestanden,
+
+            quote
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   PRÜFUNGEN – ADMIN
+   ========================================================= */
+
+app.get(
+    "/api/admin/pruefungen",
+    adminErforderlich,
+    (req,res) => {
+
+        res.json({
+
+            pruefungen:
+                daten.pruefungen
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   PRÜFUNGEN – TEILNEHMER
+   ========================================================= */
+
+app.get(
+    "/api/pruefungen/code/:code",
+    (req,res) => {
+
+        const pruefung =
+            findePruefung(
+                req.params.code
+            );
+
+
+        if(!pruefung){
+
+            return res
+                .status(404)
+                .json({
+                    error:
+                        "Prüfung wurde nicht gefunden."
+                });
+
+        }
+
+
+        /*
+          Niemals die richtigen Antworten
+          an den Teilnehmer schicken.
+        */
+
+        const sichereFragen =
+            pruefung.fragen.map(
+                frage => {
+
+                    const kopie = {
+                        ...frage
+                    };
+
+
+                    delete kopie.loesung;
+
+
+                    return kopie;
+
+                }
+            );
+
+
+        res.json({
+
+            pruefung:{
+
+                id:
+                    pruefung.id,
+
+                code:
+                    pruefung.code,
+
+                titel:
+                    pruefung.titel,
+
+                beschreibung:
+                    pruefung.beschreibung,
+
+                zeit:
+                    pruefung.zeit,
+
+                bestehensgrenze:
+                    pruefung.bestehensgrenze,
+
+                fragen:
+                    sichereFragen
+
+            }
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   KI PRÜFUNG ERSTELLEN
+   ========================================================= */
+
+app.post(
+    "/api/admin/ki/pruefung",
+    adminErforderlich,
     async (req,res) => {
 
-        try {
+        try{
 
-            const {
-                title,
-                topic,
-                material,
-                questionCount = 10,
-                difficulty = "mittel",
-                passPercent = 50,
-                timeMinutes = 30
-            } = req.body;
+            if(!openai){
 
-
-            if (
-                !title ||
-                !topic ||
-                !material
-            ) {
-
-                return res.status(400).json({
-                    error:
-                        "Titel, Thema und Unterrichtsmaterial fehlen."
-                });
+                return res
+                    .status(500)
+                    .json({
+                        error:
+                            "OPENAI_API_KEY wurde auf dem Server nicht eingerichtet."
+                    });
 
             }
 
 
-            const count =
-                Math.min(
-                    Math.max(
-                        Number(questionCount) || 10,
-                        1
-                    ),
+            const {
+
+                material,
+
+                titel,
+
+                fragen = 10,
+
+                schwierigkeit = "mittel",
+
+                zeit = 30,
+
+                bestehen = 70
+
+            } = req.body || {};
+
+
+            if(
+                typeof material !== "string" ||
+                material.trim().length < 50
+            ){
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Der Ausbildungsstoff ist zu kurz."
+                    });
+
+            }
+
+
+            const anzahl =
+                clamp(
+                    fragen,
+                    1,
+                    50
+                );
+
+
+            const zeitMinuten =
+                clamp(
+                    zeit,
+                    1,
+                    180
+                );
+
+
+            const bestehensgrenze =
+                clamp(
+                    bestehen,
+                    1,
                     100
                 );
 
 
-            const prompt = `
+            const systemPrompt = `
 
-Du bist eine professionelle KI für
-Feuerwehr-Ausbildung in Deutschland.
+Du bist eine professionelle deutsche Feuerwehr-Ausbildungs-KI.
 
-Erstelle eine realistische theoretische
-Feuerwehrprüfung.
-
-THEMA:
-${topic}
-
-SCHWIERIGKEIT:
-${difficulty}
-
-ANZAHL FRAGEN:
-${count}
-
-UNTERRICHTSMATERIAL:
-${material}
+Deine Aufgabe ist es, aus dem vom Ausbilder gelieferten
+Ausbildungsstoff eine realistische Feuerwehrprüfung zu erstellen.
 
 WICHTIG:
 
-Erstelle die Fragen ausschließlich auf Basis
-des bereitgestellten Unterrichtsmaterials.
+- Verwende ausschließlich Informationen aus dem gelieferten Ausbildungsstoff.
+- Erfinde keine Feuerwehrregeln.
+- Erfinde keine Gesetzesparagraphen.
+- Erfinde keine Einsatzvorschriften.
+- Wenn eine Information nicht im Material steht, frage sie nicht ab.
+- Die Prüfung soll fachlich verständlich formuliert sein.
+- Die Fragen sollen für eine echte Feuerwehr-Ausbildung geeignet sein.
+- Erstelle unterschiedliche Fragetypen.
+- Multiple Choice darf genau eine richtige Antwort haben.
+- Richtig/Falsch muss eindeutig sein.
+- Freitextfragen müssen anhand des Materials bewertbar sein.
 
-Erfinde keine Ausbildungsregeln.
+Die Antwort muss ausschließlich valides JSON sein.
 
-Verwende diese Fragetypen:
-
-multiple
-truefalse
-text
-
-Bei multiple müssen genau 4 Antwortmöglichkeiten
-vorhanden sein.
-
-Gib ausschließlich gültiges JSON zurück.
-
-Format:
+JSON-Format:
 
 {
-  "questions": [
+  "beschreibung": "string",
+  "fragen": [
     {
-      "type": "multiple",
-      "question": "...",
-      "options": [
-        "...",
-        "...",
-        "...",
-        "..."
+      "typ": "multiple",
+      "frage": "string",
+      "optionen": [
+        "string",
+        "string",
+        "string",
+        "string"
       ],
-      "correct": 0
+      "loesung": 0,
+      "punkte": 1
+    },
+    {
+      "typ": "truefalse",
+      "frage": "string",
+      "loesung": true,
+      "punkte": 1
+    },
+    {
+      "typ": "text",
+      "frage": "string",
+      "loesung": "string",
+      "punkte": 2
     }
   ]
 }
 
-Bei truefalse:
+Bei multiple ist "loesung" der Index der richtigen Antwort.
 
-{
-  "type": "truefalse",
-  "question": "...",
-  "correct": true
-}
+Bei truefalse ist "loesung" true oder false.
 
-Bei text:
+Bei text ist "loesung" eine Musterantwort.
 
-{
-  "type": "text",
-  "question": "...",
-  "correct": "..."
-}
+Erstelle genau ${anzahl} Fragen.
+
+Schwierigkeit:
+${schwierigkeit}
+
+Ausbildungsstoff:
+${material}
 
 `;
 
@@ -219,85 +762,267 @@ Bei text:
                 await openai.responses.create({
 
                     model:
-                        process.env.OPENAI_MODEL ||
-                        "gpt-6-luna",
+                        OPENAI_MODEL,
 
-                    input: [
+                    input:[
                         {
-                            role: "system",
+                            role:"system",
 
                             content:
-                                "Du erzeugst ausschließlich gültiges JSON für Feuerwehrprüfungen."
+                                systemPrompt
                         },
 
                         {
-                            role: "user",
+                            role:"user",
 
-                            content: prompt
+                            content:
+                                "Erstelle jetzt die Prüfung als JSON."
                         }
                     ],
 
-                    text: {
-
-                        format: {
-
-                            type:
-                                "json_object"
-
+                    text:{
+                        format:{
+                            type:"json_object"
                         }
-
                     }
 
                 });
 
 
-            const text =
+            const raw =
                 response.output_text;
 
 
-            const generated =
-                JSON.parse(text);
-
-
-            if (
-                !generated.questions ||
-                !Array.isArray(
-                    generated.questions
-                )
-            ) {
+            if(!raw){
 
                 throw new Error(
-                    "Die KI hat keine gültigen Fragen erzeugt."
+                    "Die KI hat keine Antwort geliefert."
                 );
 
             }
 
 
-            const code =
-                neuerCode();
+            let kiDaten;
+
+
+            try{
+
+                kiDaten =
+                    JSON.parse(raw);
+
+            }catch(error){
+
+                console.error(
+                    "KI JSON:",
+                    raw
+                );
+
+                throw new Error(
+                    "Die KI hat kein gültiges JSON zurückgegeben."
+                );
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    kiDaten.fragen
+                )
+            ){
+
+                throw new Error(
+                    "Die KI hat keine gültigen Fragen erstellt."
+                );
+
+            }
+
+
+            const validierteFragen =
+                kiDaten.fragen
+                    .slice(0,anzahl)
+                    .map(
+                        (frage,index) => {
+
+                            if(
+                                frage.typ === "multiple"
+                            ){
+
+                                const optionen =
+                                    Array.isArray(
+                                        frage.optionen
+                                    )
+                                    ? frage.optionen
+                                        .slice(0,4)
+                                        .map(
+                                            x =>
+                                                String(x)
+                                        )
+                                    : [];
+
+
+                                let loesung =
+                                    Number(
+                                        frage.loesung
+                                    );
+
+
+                                if(
+                                    optionen.length < 2
+                                ){
+
+                                    throw new Error(
+                                        `Frage ${index+1} hat zu wenige Antwortmöglichkeiten.`
+                                    );
+
+                                }
+
+
+                                if(
+                                    loesung < 0 ||
+                                    loesung >= optionen.length
+                                ){
+
+                                    loesung = 0;
+
+                                }
+
+
+                                return {
+
+                                    id:
+                                        neueID("frage"),
+
+                                    typ:
+                                        "multiple",
+
+                                    frage:
+                                        String(
+                                            frage.frage ||
+                                            ""
+                                        ),
+
+                                    optionen,
+
+                                    loesung,
+
+                                    punkte:
+                                        clamp(
+                                            frage.punkte || 1,
+                                            1,
+                                            10
+                                        )
+
+                                };
+
+                            }
+
+
+                            if(
+                                frage.typ === "truefalse"
+                            ){
+
+                                return {
+
+                                    id:
+                                        neueID("frage"),
+
+                                    typ:
+                                        "truefalse",
+
+                                    frage:
+                                        String(
+                                            frage.frage ||
+                                            ""
+                                        ),
+
+                                    loesung:
+                                        Boolean(
+                                            frage.loesung
+                                        ),
+
+                                    punkte:
+                                        clamp(
+                                            frage.punkte || 1,
+                                            1,
+                                            10
+                                        )
+
+                                };
+
+                            }
+
+
+                            return {
+
+                                id:
+                                    neueID("frage"),
+
+                                typ:
+                                    "text",
+
+                                frage:
+                                    String(
+                                        frage.frage ||
+                                        ""
+                                    ),
+
+                                loesung:
+                                    String(
+                                        frage.loesung ||
+                                        ""
+                                    ),
+
+                                punkte:
+                                    clamp(
+                                        frage.punkte || 2,
+                                        1,
+                                        10
+                                    )
+
+                            };
+
+                        }
+                    );
+
+
+            if(
+                validierteFragen.length === 0
+            ){
+
+                throw new Error(
+                    "Es konnten keine Fragen erstellt werden."
+                );
+
+            }
 
 
             const pruefung = {
 
                 id:
-                    crypto.randomUUID(),
+                    neueID("pruefung"),
 
-                code,
+                code:
+                    neuerPruefungscode(),
 
-                title,
+                titel:
+                    String(
+                        titel ||
+                        "Feuerwehr Prüfung"
+                    ),
 
-                topic,
+                beschreibung:
+                    String(
+                        kiDaten.beschreibung ||
+                        "Automatisch mit der Feuerwehr-KI erstellt."
+                    ),
 
-                difficulty,
+                zeit:
+                    zeitMinuten,
 
-                passPercent:
-                    Number(passPercent) || 50,
+                bestehensgrenze,
 
-                timeMinutes:
-                    Number(timeMinutes) || 30,
-
-                questions:
-                    generated.questions,
+                fragen:
+                    validierteFragen,
 
                 createdAt:
                     new Date().toISOString()
@@ -305,43 +1030,38 @@ Bei text:
             };
 
 
-            pruefungen.set(
-                code,
+            daten.pruefungen.push(
                 pruefung
             );
 
 
+            speichereDaten();
+
+
             res.json({
 
-                ok: true,
+                ok:true,
 
-                id:
-                    pruefung.id,
-
-                code,
-
-                title,
-
-                questions:
-                    pruefung.questions
+                pruefung
 
             });
 
 
-        } catch(error) {
+        }catch(error){
 
-            console.error(error);
+            console.error(
+                "KI Fehler:",
+                error
+            );
 
-            res.status(500).json({
 
-                error:
-                    "KI-Fehler: " +
-                    (
+            res
+                .status(500)
+                .json({
+                    error:
                         error.message ||
-                        "Unbekannter Fehler"
-                    )
-
-            });
+                        "Fehler bei der KI."
+                });
 
         }
 
@@ -350,102 +1070,336 @@ Bei text:
 
 
 /* =========================================================
-   ALLE PRÜFUNGEN
-========================================================= */
+   ERGEBNIS ABGEBEN
+   ========================================================= */
 
-app.get(
-    "/api/pruefungen",
-    (req,res) => {
+app.post(
+    "/api/teilnehmer/abgabe",
+    async (req,res) => {
 
-        res.json(
-            Array.from(
-                pruefungen.values()
-            )
-        );
+        try{
 
-    }
-);
+            const {
 
+                pruefungCode,
 
-/* =========================================================
-   PRÜFUNG PER CODE
-========================================================= */
+                vorname,
 
-app.get(
-    "/api/pruefungen/code/:code",
-    (req,res) => {
+                nachname,
 
-        const code =
-            req.params.code
-                .trim()
-                .toUpperCase();
+                feuerwehr,
+
+                antworten
+
+            } = req.body || {};
 
 
-        const pruefung =
-            pruefungen.get(code);
+            const pruefung =
+                findePruefung(
+                    pruefungCode
+                );
 
 
-        if (!pruefung) {
+            if(!pruefung){
 
-            return res.status(404).json({
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Prüfung wurde nicht gefunden."
+                    });
 
-                error:
-                    "Prüfung nicht gefunden."
-
-            });
-
-        }
+            }
 
 
-        /*
-         * Richtige Antworten werden hier NICHT
-         * an den Teilnehmer geschickt.
-         */
+            if(
+                !vorname ||
+                !nachname ||
+                !feuerwehr
+            ){
 
-        const oeffentlich = {
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Teilnehmerdaten fehlen."
+                    });
 
-            id:
-                pruefung.id,
+            }
 
-            code:
-                pruefung.code,
 
-            title:
-                pruefung.title,
+            if(
+                !Array.isArray(antworten)
+            ){
 
-            topic:
-                pruefung.topic,
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Antworten fehlen."
+                    });
 
-            difficulty:
-                pruefung.difficulty,
+            }
 
-            passPercent:
-                pruefung.passPercent,
 
-            timeMinutes:
-                pruefung.timeMinutes,
+            let punkte = 0;
 
-            questions:
-                pruefung.questions.map(
-                    frage => {
+            let maxPunkte = 0;
 
-                        const kopie = {
-                            ...frage
-                        };
 
-                        delete kopie.correct;
+            const bewertung = [];
 
-                        return kopie;
+
+            pruefung.fragen.forEach(
+                (frage,index) => {
+
+                    const antwort =
+                        antworten[index] ?? "";
+
+
+                    const fragePunkte =
+                        Number(
+                            frage.punkte || 1
+                        );
+
+
+                    maxPunkte +=
+                        fragePunkte;
+
+
+                    let richtig = false;
+
+                    let erhalten = 0;
+
+
+                    if(
+                        frage.typ === "multiple"
+                    ){
+
+                        const gegeben =
+                            Number(
+                                antwort
+                            );
+
+
+                        richtig =
+                            gegeben ===
+                            Number(
+                                frage.loesung
+                            );
+
+
+                        if(richtig){
+
+                            erhalten =
+                                fragePunkte;
+
+                        }
 
                     }
-                )
 
-        };
+
+                    else if(
+                        frage.typ === "truefalse"
+                    ){
+
+                        const gegeben =
+                            String(
+                                antwort
+                            ).toLowerCase() ===
+                            "true";
+
+
+                        richtig =
+                            gegeben ===
+                            Boolean(
+                                frage.loesung
+                            );
+
+
+                        if(richtig){
+
+                            erhalten =
+                                fragePunkte;
+
+                        }
+
+                    }
+
+
+                    else if(
+                        frage.typ === "text"
+                    ){
+
+                        /*
+                           Freitextfragen werden hier
+                           zunächst nicht automatisch
+                           als richtig bewertet.
+
+                           Sie können vom Ausbilder
+                           später kontrolliert werden.
+                        */
+
+                        richtig = false;
+
+                        erhalten = 0;
+
+                    }
+
+
+                    punkte +=
+                        erhalten;
+
+
+                    bewertung.push({
+
+                        frage:
+                            frage.frage,
+
+                        antwort,
+
+                        richtig,
+
+                        erhalten,
+
+                        max:
+                            fragePunkte
+
+                    });
+
+                }
+            );
+
+
+            const prozent =
+                maxPunkte === 0
+                ? 0
+                : Math.round(
+                    punkte /
+                    maxPunkte *
+                    100
+                );
+
+
+            const bestanden =
+                prozent >=
+                Number(
+                    pruefung.bestehensgrenze
+                );
+
+
+            const ergebnis = {
+
+                id:
+                    neueID("ergebnis"),
+
+                pruefungId:
+                    pruefung.id,
+
+                pruefungCode:
+                    pruefung.code,
+
+                pruefungTitel:
+                    pruefung.titel,
+
+                vorname:
+                    String(vorname),
+
+                nachname:
+                    String(nachname),
+
+                feuerwehr:
+                    String(feuerwehr),
+
+                punkte,
+
+                maxPunkte,
+
+                prozent,
+
+                bestehensgrenze:
+                    pruefung.bestehensgrenze,
+
+                bestanden,
+
+                bewertung,
+
+                status:
+                    bewertung.some(
+                        x =>
+                            x.frage &&
+                            !x.richtig &&
+                            x.max > 1
+                    )
+                    ? "automatisch"
+                    : "automatisch",
+
+                createdAt:
+                    new Date().toISOString()
+
+            };
+
+
+            daten.ergebnisse.push(
+                ergebnis
+            );
+
+
+            speichereDaten();
+
+
+            res.json({
+
+                ok:true,
+
+                ergebnis
+
+            });
+
+
+        }catch(error){
+
+            console.error(
+                "Abgabe Fehler:",
+                error
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    error:
+                        "Die Prüfung konnte nicht gespeichert werden."
+                });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN ERGEBNISSE
+   ========================================================= */
+
+app.get(
+    "/api/admin/ergebnisse",
+    adminErforderlich,
+    (req,res) => {
+
+        const ergebnisse =
+            [...daten.ergebnisse]
+                .sort(
+                    (a,b) =>
+                        new Date(b.createdAt) -
+                        new Date(a.createdAt)
+                );
 
 
         res.json({
-            pruefung:
-                oeffentlich
+
+            ergebnisse
+
         });
 
     }
@@ -453,273 +1407,91 @@ app.get(
 
 
 /* =========================================================
-   PRÜFUNG ABGEBEN
-========================================================= */
+   404
+   ========================================================= */
 
-app.post(
-    "/api/teilnehmer/abgabe",
+app.use(
     (req,res) => {
 
-        try {
-
-            const {
-                code,
-                teilnehmer,
-                answers
-            } = req.body;
-
-
-            const pruefung =
-                pruefungen.get(
-                    String(code)
-                        .trim()
-                        .toUpperCase()
-                );
-
-
-            if (!pruefung) {
-
-                return res.status(404).json({
-
-                    error:
-                        "Prüfung nicht gefunden."
-
-                });
-
-            }
-
-
-            let correct = 0;
-
-
-            pruefung.questions.forEach(
-                (frage,index) => {
-
-                    const antwort =
-                        answers?.[index];
-
-
-                    if (
-                        frage.type ===
-                        "multiple"
-                    ) {
-
-                        if (
-                            Number(antwort) ===
-                            Number(frage.correct)
-                        ) {
-
-                            correct++;
-
-                        }
-
-                    }
-
-
-                    else if (
-                        frage.type ===
-                        "truefalse"
-                    ) {
-
-                        const wert =
-                            String(
-                                antwort
-                            ).toLowerCase()
-                            === "true";
-
-
-                        if (
-                            wert ===
-                            Boolean(
-                                frage.correct
-                            )
-                        ) {
-
-                            correct++;
-
-                        }
-
-                    }
-
-
-                    else if (
-                        frage.type ===
-                        "text"
-                    ) {
-
-                        /*
-                         * Textfragen werden bewusst
-                         * nicht automatisch als richtig
-                         * bewertet.
-                         *
-                         * Sie können später vom
-                         * Ausbilder korrigiert werden.
-                         */
-
-                    }
-
-                }
-            );
-
-
-            const total =
-                pruefung.questions.length;
-
-
-            const percent =
-                Math.round(
-                    (correct / total) * 100
-                );
-
-
-            const bestanden =
-                percent >=
-                pruefung.passPercent;
-
-
-            const id =
-                crypto.randomUUID();
-
-
-            const ergebnis = {
-
-                id,
-
-                examId:
-                    pruefung.id,
-
-                code:
-                    pruefung.code,
-
-                pruefung:
-                    pruefung.title,
-
-                teilnehmer,
-
-                answers,
-
-                correct,
-
-                total,
-
-                percent,
-
-                bestanden,
-
-                createdAt:
-                    new Date().toISOString()
-
-            };
-
-
-            ergebnisse.set(
-                id,
-                ergebnis
-            );
-
-
-            res.json({
-
-                ok: true,
-
-                id,
-
-                correct,
-
-                total,
-
-                percent,
-
-                bestanden
-
-            });
-
-
-        } catch(error) {
-
-            console.error(error);
-
-            res.status(500).json({
-
+        res
+            .status(404)
+            .json({
                 error:
-                    "Die Prüfung konnte nicht gespeichert werden."
-
+                    "API-Endpunkt nicht gefunden."
             });
-
-        }
 
     }
 );
 
 
 /* =========================================================
-   ERGEBNIS
-========================================================= */
+   FEHLER
+   ========================================================= */
 
-app.get(
-    "/api/ergebnis/:id",
-    (req,res) => {
+app.use(
+    (error,req,res,next) => {
 
-        const ergebnis =
-            ergebnisse.get(
-                req.params.id
-            );
+        console.error(
+            "Serverfehler:",
+            error
+        );
 
 
-        if (!ergebnis) {
-
-            return res.status(404).json({
-
+        res
+            .status(500)
+            .json({
                 error:
-                    "Ergebnis nicht gefunden."
-
+                    "Interner Serverfehler."
             });
 
-        }
-
-
-        res.json(ergebnis);
-
     }
 );
 
 
 /* =========================================================
-   AUSWERTUNG
-========================================================= */
-
-app.get(
-    "/api/auswertung/:examId",
-    (req,res) => {
-
-        const liste =
-            Array.from(
-                ergebnisse.values()
-            )
-            .filter(
-                ergebnis =>
-                    ergebnis.examId ===
-                    req.params.examId
-            );
-
-
-        res.json(liste);
-
-    }
-);
-
-
-/* =========================================================
-   SERVER
-========================================================= */
+   SERVER START
+   ========================================================= */
 
 app.listen(
     PORT,
     () => {
 
         console.log(
-            "🚒 Feuerwehr Prüfungsplattform läuft auf Port " +
-            PORT
+            "======================================"
+        );
+
+        console.log(
+            "🚒 Feuerwehr Prüfungsplattform"
+        );
+
+        console.log(
+            "======================================"
+        );
+
+        console.log(
+            "Server:",
+            `http://localhost:${PORT}`
+        );
+
+        console.log(
+            "KI:",
+            openai
+                ? "AKTIV"
+                : "NICHT KONFIGURIERT"
+        );
+
+        console.log(
+            "Modell:",
+            OPENAI_MODEL
+        );
+
+        console.log(
+            "Datenbank:",
+            DATA_FILE
+        );
+
+        console.log(
+            "======================================"
         );
 
     }
