@@ -1,1 +1,3404 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Feuerwehr Prüfungssystem</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #090b10;
+    --panel: #11151d;
+    --panel2: #171c26;
+    --border: #2b3442;
+    --red: #d71920;
+    --red2: #ff3138;
+    --text: #f4f6f8;
+    --muted: #9ca7b5;
+    --green: #24c77a;
+    --yellow: #f3c744;
+    --blue: #4b9cff;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top right, rgba(215,25,32,.16), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(215,25,32,.08), transparent 30%),
+        var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    height: 72px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(9,11,16,.94);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 900;
+    font-size: 20px;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--red), #7e0d12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    box-shadow: 0 8px 30px rgba(215,25,32,.25);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn {
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: var(--text);
+    padding: 11px 17px;
+    border-radius: 10px;
+    transition: .2s;
+    font-weight: 700;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    border-color: #465466;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--red2), var(--red));
+    border-color: transparent;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 8px 25px rgba(215,25,32,.25);
+}
+
+.btn-success {
+    background: var(--green);
+    color: #06150e;
+    border-color: transparent;
+}
+
+.btn-danger {
+    background: #721319;
+    border-color: #a51c25;
+}
+
+.btn-blue {
+    background: var(--blue);
+    color: #06101d;
+    border-color: transparent;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.container {
+    width: min(1200px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.page {
+    padding: 40px 0 80px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    min-height: 520px;
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    align-items: center;
+    gap: 50px;
+}
+
+.hero h1 {
+    font-size: clamp(42px, 7vw, 76px);
+    line-height: .95;
+    margin-bottom: 22px;
+}
+
+.hero h1 span {
+    color: var(--red2);
+}
+
+.hero p {
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.7;
+    max-width: 700px;
+}
+
+.hero-actions {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.fire-card {
+    min-height: 340px;
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    background:
+        linear-gradient(145deg, rgba(215,25,32,.16), transparent 50%),
+        var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,.3);
+}
+
+.fire-symbol {
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+    background: radial-gradient(circle, rgba(215,25,32,.25), transparent 65%);
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card {
+    background: rgba(17,21,29,.95);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+}
+
+.card h2,
+.card h3 {
+    margin-bottom: 10px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.grid {
+    display: grid;
+    gap: 18px;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.stat {
+    padding: 22px;
+    border-radius: 16px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+}
+
+.stat-number {
+    font-size: 34px;
+    font-weight: 900;
+    margin-top: 5px;
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #dfe4ea;
+    font-weight: 700;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: #0c1016;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 13px 14px;
+    outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--red2);
+    box-shadow: 0 0 0 3px rgba(215,25,32,.1);
+}
+
+textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.row > * {
+    flex: 1;
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+.login-wrapper {
+    min-height: calc(100vh - 72px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    width: min(480px, 100%);
+}
+
+/* =========================
+   ADMIN
+========================= */
+
+.admin-layout {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 20px;
+}
+
+.sidebar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px;
+    height: fit-content;
+    position: sticky;
+    top: 92px;
+}
+
+.sidebar button {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 8px;
+}
+
+.sidebar button.active {
+    background: var(--red);
+    border-color: transparent;
+}
+
+.admin-content {
+    min-width: 0;
+}
+
+/* =========================
+   EXAM
+========================= */
+
+.exam-header {
+    position: sticky;
+    top: 72px;
+    z-index: 50;
+    background: rgba(9,11,16,.95);
+    border-bottom: 1px solid var(--border);
+    padding: 15px 0;
+    backdrop-filter: blur(10px);
+}
+
+.exam-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.timer {
+    background: #361015;
+    border: 1px solid #6d2028;
+    color: #ff6670;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-weight: 900;
+}
+
+.progress {
+    height: 7px;
+    background: #202733;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--red2));
+    width: 0%;
+    transition: .2s;
+}
+
+.question {
+    margin-bottom: 20px;
+}
+
+.question-number {
+    color: var(--red2);
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.question-text {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.45;
+    margin-bottom: 18px;
+}
+
+.answer-option {
+    display: block;
+    padding: 15px;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.answer-option:hover {
+    border-color: #59687b;
+}
+
+.answer-option input {
+    width: auto;
+    margin-right: 10px;
+}
+
+/* =========================
+   RESULTS
+========================= */
+
+.result-box {
+    text-align: center;
+    padding: 45px 20px;
+}
+
+.result-circle {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    border: 10px solid var(--red);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+}
+
+.result-percent {
+    font-size: 42px;
+    font-weight: 900;
+}
+
+.result-status {
+    font-size: 25px;
+    font-weight: 900;
+}
+
+.success {
+    color: var(--green);
+}
+
+.failed {
+    color: #ff5963;
+}
+
+.warning {
+    color: var(--yellow);
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 13px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+th {
+    color: var(--muted);
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.badge-green {
+    background: rgba(36,199,122,.13);
+    color: var(--green);
+}
+
+.badge-red {
+    background: rgba(215,25,32,.13);
+    color: #ff6670;
+}
+
+.badge-yellow {
+    background: rgba(243,199,68,.13);
+    color: var(--yellow);
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal-box {
+    width: min(850px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 5000;
+}
+
+.toast {
+    background: #151b24;
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-top: 10px;
+    box-shadow: 0 15px 40px rgba(0,0,0,.35);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 850px) {
+
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+    }
+
+    .header {
+        padding: 0 15px;
+    }
+
+    .header-actions .btn {
+        padding: 9px 11px;
+    }
+
+    .hero {
+        padding-top: 25px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo">
+        <div class="logo-icon">🚒</div>
+        <span>Feuerwehr Prüfung</span>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn" onclick="showHome()">Startseite</button>
+        <button class="btn btn-primary" onclick="showAdminLogin()">Ausbilder</button>
+    </div>
+</header>
+
+<main id="app"></main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div id="modal" class="modal hidden">
+    <div id="modalContent" class="modal-box"></div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   KONFIGURATION
+========================================================= */
+
+const STORAGE_EXAMS = "FW_EXAMS_WEB_V1";
+const STORAGE_RESULTS = "FW_RESULTS_WEB_V1";
+const STORAGE_SESSION = "FW_ADMIN_SESSION_WEB_V1";
+
+const ADMIN_EMAIL = "Ausbilder@gmail.com";
+const ADMIN_PASSWORD = "Admin";
+
+let exams = loadJSON(STORAGE_EXAMS, []);
+let results = loadJSON(STORAGE_RESULTS, []);
+
+let currentExam = null;
+let currentAnswers = [];
+let examTimer = null;
+let examEndTime = null;
+let currentResult = null;
+
+/* =========================================================
+   HILFSFUNKTIONEN
+========================================================= */
+
+function loadJSON(key, fallback) {
+
+    try {
+
+        const value =
+            localStorage.getItem(key);
+
+        return value
+            ? JSON.parse(value)
+            : fallback;
+
+    } catch {
+
+        return fallback;
+    }
+}
+
+function saveJSON(key, value) {
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(value)
+    );
+}
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function uid() {
+
+    return (
+        Date.now().toString(36) +
+        Math.random()
+            .toString(36)
+            .substring(2)
+    );
+}
+
+function showToast(message) {
+
+    const container =
+        document.getElementById(
+            "toastContainer"
+        );
+
+    const toast =
+        document.createElement("div");
+
+    toast.className = "toast";
+
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3500);
+}
+
+function generateExamCode() {
+
+    let code;
+
+    do {
+
+        code =
+            Math.random()
+                .toString(36)
+                .substring(2, 8)
+                .toUpperCase();
+
+    } while (
+        exams.some(
+            exam =>
+                exam.code === code
+        )
+    );
+
+    return code;
+}
+
+/* =========================================================
+   HOME
+========================================================= */
+
+function showHome() {
+
+    stopTimer();
+
+    document.getElementById("app").innerHTML = `
+        <div class="container page">
+
+            <section class="hero">
+
+                <div>
+
+                    <div class="badge badge-red">
+                        DIGITALES FEUERWEHR-PRÜFUNGSSYSTEM
+                    </div>
+
+                    <h1>
+                        Wissen prüfen.<br>
+                        <span>Einsatzbereit sein.</span>
+                    </h1>
+
+                    <p>
+                        Eine moderne Prüfungsplattform für
+                        Feuerwehr-Ausbildungen. Teilnehmer
+                        bearbeiten Prüfungen digital und
+                        Ausbilder können eigenes Unterrichtsmaterial
+                        verwenden, um daraus automatisch Fragen
+                        erstellen zu lassen.
+                    </p>
+
+                    <div class="hero-actions">
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="showParticipant()">
+                            👨‍🚒 Prüfung starten
+                        </button>
+
+                        <button
+                            class="btn"
+                            onclick="showAdminLogin()">
+                            🧑‍🏫 Ausbilderbereich
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="fire-card">
+                    <div class="fire-symbol">
+                        🚒
+                    </div>
+                </div>
+
+            </section>
+
+            <div class="grid grid-3">
+
+                <div class="card">
+                    <h3>🤖 Ausbilder-KI</h3>
+                    <p class="muted">
+                        Erstellt Fragen aus deinem
+                        bereitgestellten Unterrichtsmaterial.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>📝 Digitale Prüfung</h3>
+                    <p class="muted">
+                        Teilnehmer können Prüfungen
+                        direkt im Browser durchführen.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Auswertung</h3>
+                    <p class="muted">
+                        Antworten werden automatisch
+                        ausgewertet und Ergebnisse angezeigt.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+
+/* =========================================================
+   TEILNEHMER
+========================================================= */
+
+function showParticipant() {
+
+    document.getElementById("app").innerHTML = `
+        <div class="container page">
+
+            <div class="card">
+
+                <h2>👨‍🚒 Prüfungsteilnehmer</h2>
+
+                <p class="muted">
+                    Gib deine Daten und den Prüfungscode ein.
+                </p>
+
+                <br>
+
+                <div class="grid grid-2">
+
+                    <div class="form-group">
+                        <label>Vorname</label>
+                        <input
+                            id="firstName"
+                            placeholder="Max">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nachname</label>
+                        <input
+                            id="lastName"
+                            placeholder="Mustermann">
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Feuerwehr</label>
+
+                    <input
+                        id="fireDepartment"
+                        placeholder="z. B. Feuerwehr Musterstadt">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Prüfungscode</label>
+
+                    <input
+                        id="examCode"
+                        placeholder="z. B. A7F3K2"
+                        style="text-transform:uppercase">
+
+                </div>
+
+                <div class="row">
+
+                    <button
+                        class="btn"
+                        onclick="showHome()">
+                        Zurück
+                    </button>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="startExamFromForm()">
+                        Prüfung starten
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+
+function startExamFromForm() {
+
+    const firstName =
+        document.getElementById(
+            "firstName"
+        ).value.trim();
+
+    const lastName =
+        document.getElementById(
+            "lastName"
+        ).value.trim();
+
+    const fireDepartment =
+        document.getElementById(
+            "fireDepartment"
+        ).value.trim();
+
+    const code =
+        document.getElementById(
+            "examCode"
+        ).value
+        .trim()
+        .toUpperCase();
+
+    if (!firstName || !lastName) {
+
+        showToast(
+            "Bitte Vor- und Nachnamen eingeben."
+        );
+
+        return;
+    }
+
+    if (!code) {
+
+        showToast(
+            "Bitte Prüfungscode eingeben."
+        );
+
+        return;
+    }
+
+    const exam =
+        exams.find(
+            item =>
+                item.code === code
+        );
+
+    if (!exam) {
+
+        showToast(
+            "Prüfungscode nicht gefunden."
+        );
+
+        return;
+    }
+
+    startExam(
+        exam,
+        {
+            firstName,
+            lastName,
+            fireDepartment
+        }
+    );
+}
+
+/* =========================================================
+   PRÜFUNG STARTEN
+========================================================= */
+
+function startExam(
+    exam,
+    participant
+) {
+
+    currentExam = {
+        ...exam,
+        participant
+    };
+
+    currentAnswers =
+        new Array(
+            exam.questions.length
+        ).fill(null);
+
+    if (
+        exam.duration &&
+        Number(exam.duration) > 0
+    ) {
+
+        examEndTime =
+            Date.now() +
+            Number(exam.duration) *
+            60 *
+            1000;
+
+    } else {
+
+        examEndTime = null;
+    }
+
+    renderExam();
+
+    startTimer();
+}
+
+function renderExam() {
+
+    const exam =
+        currentExam;
+
+    document.getElementById("app").innerHTML = `
+
+        <div class="exam-header">
+
+            <div class="container">
+
+                <div class="exam-header-inner">
+
+                    <div>
+                        <strong>
+                            ${escapeHTML(exam.title)}
+                        </strong>
+
+                        <div class="muted">
+                            ${escapeHTML(
+                                exam.participant.firstName
+                            )}
+                            ${escapeHTML(
+                                exam.participant.lastName
+                            )}
+                        </div>
+                    </div>
+
+                    <div
+                        id="timer"
+                        class="timer">
+                        --
+                    </div>
+
+                </div>
+
+                <div class="progress">
+                    <div
+                        id="progressBar"
+                        class="progress-bar">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="container page">
+
+            <div id="examQuestions"></div>
+
+            <div class="card">
+
+                <button
+                    class="btn btn-primary"
+                    onclick="submitExam()">
+                    Prüfung abgeben
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    renderQuestions();
+}
+
+function renderQuestions() {
+
+    const container =
+        document.getElementById(
+            "examQuestions"
+        );
+
+    let html = "";
+
+    currentExam.questions.forEach(
+        (question, index) => {
+
+            html += `
+                <div class="card question">
+
+                    <div class="question-number">
+                        FRAGE ${index + 1}
+                    </div>
+
+                    <div class="question-text">
+                        ${escapeHTML(
+                            question.question
+                        )}
+                    </div>
+            `;
+
+            if (
+                question.type === "mc"
+            ) {
+
+                question.options.forEach(
+                    (option, optionIndex) => {
+
+                        const checked =
+                            currentAnswers[index] ===
+                            optionIndex
+                                ? "checked"
+                                : "";
+
+                        html += `
+                            <label class="answer-option">
+
+                                <input
+                                    type="radio"
+                                    name="question_${index}"
+                                    ${checked}
+                                    onchange="setAnswer(
+                                        ${index},
+                                        ${optionIndex}
+                                    )">
+
+                                ${escapeHTML(
+                                    option
+                                )}
+
+                            </label>
+                        `;
+                    }
+                );
+
+            } else if (
+                question.type ===
+                "truefalse"
+            ) {
+
+                html += `
+                    <label class="answer-option">
+                        <input
+                            type="radio"
+                            name="question_${index}"
+                            ${currentAnswers[index] === true ? "checked" : ""}
+                            onchange="setAnswer(${index}, true)">
+                        Richtig
+                    </label>
+
+                    <label class="answer-option">
+                        <input
+                            type="radio"
+                            name="question_${index}"
+                            ${currentAnswers[index] === false ? "checked" : ""}
+                            onchange="setAnswer(${index}, false)">
+                        Falsch
+                    </label>
+                `;
+
+            } else {
+
+                html += `
+                    <textarea
+                        placeholder="Deine Antwort..."
+                        oninput="setAnswer(
+                            ${index},
+                            this.value
+                        )"
+                    >${escapeHTML(
+                        currentAnswers[index] || ""
+                    )}</textarea>
+                `;
+            }
+
+            html += `
+                </div>
+            `;
+        }
+    );
+
+    container.innerHTML = html;
+
+    updateProgress();
+}
+
+function setAnswer(
+    index,
+    value
+) {
+
+    currentAnswers[index] = value;
+
+    updateProgress();
+}
+
+function updateProgress() {
+
+    const total =
+        currentExam.questions.length;
+
+    let answered = 0;
+
+    currentAnswers.forEach(
+        answer => {
+
+            if (
+                answer !== null &&
+                answer !== "" &&
+                answer !== undefined
+            ) {
+
+                answered++;
+            }
+        }
+    );
+
+    const percent =
+        total > 0
+            ? (answered / total) * 100
+            : 0;
+
+    const bar =
+        document.getElementById(
+            "progressBar"
+        );
+
+    if (bar) {
+
+        bar.style.width =
+            percent + "%";
+    }
+}
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function startTimer() {
+
+    stopTimer();
+
+    if (!examEndTime) {
+
+        const timer =
+            document.getElementById(
+                "timer"
+            );
+
+        if (timer) {
+            timer.textContent =
+                "Keine Zeitbegrenzung";
+        }
+
+        return;
+    }
+
+    examTimer =
+        setInterval(
+            updateTimer,
+            1000
+        );
+
+    updateTimer();
+}
+
+function updateTimer() {
+
+    const timer =
+        document.getElementById(
+            "timer"
+        );
+
+    if (!timer) {
+
+        stopTimer();
+
+        return;
+    }
+
+    let remaining =
+        examEndTime -
+        Date.now();
+
+    if (remaining <= 0) {
+
+        timer.textContent =
+            "00:00";
+
+        stopTimer();
+
+        showToast(
+            "Die Prüfungszeit ist abgelaufen."
+        );
+
+        submitExam(true);
+
+        return;
+    }
+
+    const totalSeconds =
+        Math.floor(
+            remaining / 1000
+        );
+
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
+
+    const seconds =
+        totalSeconds % 60;
+
+    timer.textContent =
+        String(minutes)
+            .padStart(2, "0")
+        + ":" +
+        String(seconds)
+            .padStart(2, "0");
+}
+
+function stopTimer() {
+
+    if (examTimer) {
+
+        clearInterval(
+            examTimer
+        );
+
+        examTimer = null;
+    }
+}
+
+/* =========================================================
+   PRÜFUNG AUSWERTEN
+========================================================= */
+
+function submitExam(
+    automatic = false
+) {
+
+    if (!automatic) {
+
+        const unanswered =
+            currentAnswers.filter(
+                answer =>
+                    answer === null ||
+                    answer === ""
+            ).length;
+
+        if (unanswered > 0) {
+
+            const confirmSubmit =
+                confirm(
+                    `Du hast noch ${unanswered} Frage(n) nicht beantwortet. Trotzdem abgeben?`
+                );
+
+            if (!confirmSubmit) {
+                return;
+            }
+        }
+    }
+
+    stopTimer();
+
+    const exam =
+        currentExam;
+
+    let correct = 0;
+
+    let manualQuestions = 0;
+
+    const questionResults = [];
+
+    exam.questions.forEach(
+        (question, index) => {
+
+            const answer =
+                currentAnswers[index];
+
+            if (
+                question.type ===
+                "text"
+            ) {
+
+                manualQuestions++;
+
+                questionResults.push({
+                    index,
+                    correct: null,
+                    manual: true
+                });
+
+                return;
+            }
+
+            let isCorrect = false;
+
+            if (
+                question.type ===
+                "mc"
+            ) {
+
+                isCorrect =
+                    answer ===
+                    question.correctAnswer;
+            }
+
+            if (
+                question.type ===
+                "truefalse"
+            ) {
+
+                isCorrect =
+                    answer ===
+                    question.correctAnswer;
+            }
+
+            if (isCorrect) {
+                correct++;
+            }
+
+            questionResults.push({
+                index,
+                correct: isCorrect,
+                manual: false
+            });
+        }
+    );
+
+    const automaticQuestions =
+        exam.questions.length -
+        manualQuestions;
+
+    const percent =
+        automaticQuestions > 0
+            ? Math.round(
+                correct /
+                automaticQuestions *
+                100
+            )
+            : 0;
+
+    const passed =
+        manualQuestions === 0 &&
+        percent >=
+            Number(
+                exam.passPercent || 50
+            );
+
+    const result = {
+
+        id: uid(),
+
+        examId:
+            exam.id,
+
+        examTitle:
+            exam.title,
+
+        participant:
+            exam.participant,
+
+        answers:
+            currentAnswers,
+
+        questionResults,
+
+        automaticPoints:
+            correct,
+
+        manualPoints: 0,
+
+        maxAutomaticPoints:
+            automaticQuestions,
+
+        percent,
+
+        passed,
+
+        needsManualCorrection:
+            manualQuestions > 0,
+
+        submittedAt:
+            new Date().toISOString()
+    };
+
+    results.push(result);
+
+    saveJSON(
+        STORAGE_RESULTS,
+        results
+    );
+
+    currentResult = result;
+
+    showResult(result);
+}
+
+/* =========================================================
+   ERGEBNIS
+========================================================= */
+
+function showResult(result) {
+
+    const statusClass =
+        result.needsManualCorrection
+            ? "warning"
+            : result.passed
+                ? "success"
+                : "failed";
+
+    const status =
+        result.needsManualCorrection
+            ? "Auswertung offen"
+            : result.passed
+                ? "BESTANDEN"
+                : "NICHT BESTANDEN";
+
+    document.getElementById("app").innerHTML = `
+
+        <div class="container page">
+
+            <div class="card result-box">
+
+                <div class="result-circle">
+
+                    <div class="result-percent">
+                        ${result.percent}%
+                    </div>
+
+                    <div class="muted">
+                        Ergebnis
+                    </div>
+
+                </div>
+
+                <div class="result-status ${statusClass}">
+                    ${status}
+                </div>
+
+                <br>
+
+                <p class="muted">
+                    ${escapeHTML(
+                        result.participant.firstName
+                    )}
+                    ${escapeHTML(
+                        result.participant.lastName
+                    )}
+                </p>
+
+                <p class="muted">
+                    ${escapeHTML(
+                        result.examTitle
+                    )}
+                </p>
+
+                ${
+                    result.needsManualCorrection
+                    ? `
+                        <br>
+                        <p class="warning">
+                            Deine Prüfung enthält Freitextfragen.
+                            Ein Ausbilder muss diese noch korrigieren.
+                        </p>
+                    `
+                    : ""
+                }
+
+                <br>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="showHome()">
+                    Zur Startseite
+                </button>
+
+            </div>
+
+        </div>
+    `;
+}
+
+/* =========================================================
+   ADMIN LOGIN
+========================================================= */
+
+function showAdminLogin() {
+
+    document.getElementById("app").innerHTML = `
+
+        <div class="container">
+
+            <div class="login-wrapper">
+
+                <div class="card login-card">
+
+                    <div style="text-align:center">
+
+                        <div
+                            class="logo-icon"
+                            style="
+                                margin:0 auto 18px;
+                                width:65px;
+                                height:65px;
+                                font-size:32px;
+                            ">
+                            🧑‍🚒
+                        </div>
+
+                        <h2>Ausbilderbereich</h2>
+
+                        <p class="muted">
+                            Anmeldung für Feuerwehr-Ausbilder
+                        </p>
+
+                    </div>
+
+                    <br>
+
+                    <div class="form-group">
+
+                        <label>E-Mail</label>
+
+                        <input
+                            id="adminEmail"
+                            type="email"
+                            placeholder="Ausbilder@gmail.com">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Passwort</label>
+
+                        <input
+                            id="adminPassword"
+                            type="password"
+                            placeholder="Passwort">
+
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        style="width:100%"
+                        onclick="adminLogin()">
+                        Anmelden
+                    </button>
+
+                    <br><br>
+
+                    <button
+                        class="btn"
+                        style="width:100%"
+                        onclick="showHome()">
+                        Zurück
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+
+function adminLogin() {
+
+    const email =
+        document.getElementById(
+            "adminEmail"
+        ).value.trim();
+
+    const password =
+        document.getElementById(
+            "adminPassword"
+        ).value;
+
+    if (
+        email === ADMIN_EMAIL &&
+        password === ADMIN_PASSWORD
+    ) {
+
+        localStorage.setItem(
+            STORAGE_SESSION,
+            "true"
+        );
+
+        showAdmin();
+
+    } else {
+
+        showToast(
+            "E-Mail oder Passwort falsch."
+        );
+    }
+}
+
+function adminLogout() {
+
+    localStorage.removeItem(
+        STORAGE_SESSION
+    );
+
+    showHome();
+}
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+function showAdmin(
+    activeTab = "overview"
+) {
+
+    if (
+        localStorage.getItem(
+            STORAGE_SESSION
+        ) !== "true"
+    ) {
+
+        showAdminLogin();
+
+        return;
+    }
+
+    document.getElementById("app").innerHTML = `
+
+        <div class="container page">
+
+            <div class="admin-layout">
+
+                <aside class="sidebar">
+
+                    <button
+                        id="tab-overview"
+                        class="btn"
+                        onclick="openAdminTab('overview')">
+                        📊 Übersicht
+                    </button>
+
+                    <button
+                        id="tab-create"
+                        class="btn"
+                        onclick="openAdminTab('create')">
+                        ➕ Prüfung erstellen
+                    </button>
+
+                    <button
+                        id="tab-exams"
+                        class="btn"
+                        onclick="openAdminTab('exams')">
+                        📝 Prüfungen
+                    </button>
+
+                    <button
+                        id="tab-results"
+                        class="btn"
+                        onclick="openAdminTab('results')">
+                        📊 Ergebnisse
+                    </button>
+
+                    <hr
+                        style="
+                            border:none;
+                            border-top:1px solid var(--border);
+                            margin:14px 0;
+                        ">
+
+                    <button
+                        class="btn btn-danger"
+                        onclick="adminLogout()">
+                        Abmelden
+                    </button>
+
+                </aside>
+
+                <section
+                    class="admin-content"
+                    id="adminContent">
+                </section>
+
+            </div>
+
+        </div>
+    `;
+
+    openAdminTab(activeTab);
+}
+
+function openAdminTab(tab) {
+
+    document.querySelectorAll(
+        ".sidebar button"
+    ).forEach(
+        button =>
+            button.classList.remove(
+                "active"
+            )
+    );
+
+    const active =
+        document.getElementById(
+            "tab-" + tab
+        );
+
+    if (active) {
+        active.classList.add("active");
+    }
+
+    if (tab === "overview") {
+        renderOverview();
+    }
+
+    if (tab === "create") {
+        renderCreateExam();
+    }
+
+    if (tab === "exams") {
+        renderExams();
+    }
+
+    if (tab === "results") {
+        renderResults();
+    }
+}
+
+/* =========================================================
+   ÜBERSICHT
+========================================================= */
+
+function renderOverview() {
+
+    const passed =
+        results.filter(
+            result =>
+                result.passed
+        ).length;
+
+    const corrections =
+        results.filter(
+            result =>
+                result.needsManualCorrection
+        ).length;
+
+    document.getElementById(
+        "adminContent"
+    ).innerHTML = `
+
+        <div class="card">
+
+            <h2>📊 Übersicht</h2>
+
+            <p class="muted">
+                Willkommen im Feuerwehr-Ausbilderbereich.
+            </p>
+
+            <br>
+
+            <div class="grid grid-3">
+
+                <div class="stat">
+                    <div class="muted">
+                        Prüfungen
+                    </div>
+                    <div class="stat-number">
+                        ${exams.length}
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="muted">
+                        Ergebnisse
+                    </div>
+                    <div class="stat-number">
+                        ${results.length}
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="muted">
+                        Bestanden
+                    </div>
+                    <div class="stat-number">
+                        ${passed}
+                    </div>
+                </div>
+
+            </div>
+
+            ${
+                corrections > 0
+                ? `
+                    <br>
+                    <div class="card">
+                        <strong class="warning">
+                            ⚠️ ${corrections}
+                            Prüfung(en) warten auf manuelle Korrektur.
+                        </strong>
+                    </div>
+                `
+                : ""
+            }
+
+        </div>
+    `;
+}
+
+/* =========================================================
+   PRÜFUNG ERSTELLEN
+========================================================= */
+
+function renderCreateExam() {
+
+    document.getElementById(
+        "adminContent"
+    ).innerHTML = `
+
+        <div class="card">
+
+            <h2>➕ Neue Prüfung erstellen</h2>
+
+            <p class="muted">
+                Gib dein Unterrichtsmaterial ein.
+                Die integrierte Feuerwehr-KI erstellt
+                daraus automatisch Fragen.
+            </p>
+
+            <br>
+
+            <div class="form-group">
+
+                <label>Prüfungstitel</label>
+
+                <input
+                    id="examTitle"
+                    placeholder="z. B. Truppmann 1 – Grundlagen">
+
+            </div>
+
+            <div class="grid grid-2">
+
+                <div class="form-group">
+
+                    <label>Bestehensgrenze (%)</label>
+
+                    <input
+                        id="passPercent"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value="50">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Prüfungsdauer (Minuten)</label>
+
+                    <input
+                        id="examDuration"
+                        type="number"
+                        min="0"
+                        value="30">
+
+                </div>
+
+            </div>
+
+            <div class="grid grid-2">
+
+                <div class="form-group">
+
+                    <label>Schwierigkeit</label>
+
+                    <select id="difficulty">
+
+                        <option value="leicht">
+                            Leicht
+                        </option>
+
+                        <option
+                            value="mittel"
+                            selected>
+                            Mittel
+                        </option>
+
+                        <option value="schwer">
+                            Schwer
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Anzahl Fragen</label>
+
+                    <input
+                        id="questionCount"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value="10">
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Unterrichtsmaterial
+                </label>
+
+                <textarea
+                    id="material"
+                    placeholder="Hier dein Unterrichtsmaterial einfügen..."></textarea>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Oder Textdatei laden
+                </label>
+
+                <input
+                    type="file"
+                    id="materialFile"
+                    accept=".txt,.md,.csv">
+
+            </div>
+
+            <div class="row">
+
+                <button
+                    class="btn btn-blue"
+                    onclick="loadMaterialFile()">
+                    📂 Datei laden
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="createExam()">
+                    🤖 Prüfung mit KI erstellen
+                </button>
+
+            </div>
+
+        </div>
+    `;
+}
+
+/* =========================================================
+   DATEI LADEN
+========================================================= */
+
+function loadMaterialFile() {
+
+    const input =
+        document.getElementById(
+            "materialFile"
+        );
+
+    const file =
+        input.files[0];
+
+    if (!file) {
+
+        showToast(
+            "Bitte zuerst eine Datei auswählen."
+        );
+
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload = () => {
+
+        document.getElementById(
+            "material"
+        ).value =
+            reader.result;
+
+        showToast(
+            "Unterrichtsmaterial geladen."
+        );
+    };
+
+    reader.readAsText(file);
+}
+
+/* =========================================================
+   KI – MATERIAL ANALYSIEREN
+========================================================= */
+
+function normalizeText(text) {
+
+    return String(text || "")
+        .replace(/\r/g, "")
+        .replace(/\t/g, " ")
+        .replace(/[ ]{2,}/g, " ")
+        .trim();
+}
+
+function splitSentences(text) {
+
+    return normalizeText(text)
+        .split(
+            /(?<=[.!?])\s+|\n+/
+        )
+        .map(
+            item => item.trim()
+        )
+        .filter(
+            item =>
+                item.length >= 25
+        );
+}
+
+function importantWords(sentence) {
+
+    const stopWords = new Set([
+        "der","die","das",
+        "den","dem","des",
+        "ein","eine","einer",
+        "einem","einen",
+        "und","oder","aber",
+        "ist","sind","war",
+        "wird","werden",
+        "mit","von","für",
+        "auf","aus","bei",
+        "als","auch","nach",
+        "durch","über","unter",
+        "nicht","sich",
+        "zur","zum",
+        "im","in","an",
+        "zu","es"
+    ]);
+
+    return sentence
+        .replace(
+            /[^A-Za-zÄÖÜäöüß0-9 -]/g,
+            " "
+        )
+        .split(/\s+/)
+        .filter(
+            word =>
+                word.length >= 5 &&
+                !stopWords.has(
+                    word.toLowerCase()
+                )
+        );
+}
+
+function extractDefinitions(sentences) {
+
+    const output = [];
+
+    sentences.forEach(
+        sentence => {
+
+            const match =
+                sentence.match(
+                    /^(.{3,60}?)\s+(?:ist|sind|bezeichnet|bedeutet|nennt man)\s+(.{15,180})[.!?]?$/i
+                );
+
+            if (match) {
+
+                output.push({
+                    term:
+                        match[1].trim(),
+
+                    definition:
+                        match[2].trim(),
+
+                    sentence
+                });
+            }
+        }
+    );
+
+    return output;
+}
+
+function extractNumbers(sentences) {
+
+    const output = [];
+
+    sentences.forEach(
+        sentence => {
+
+            if (
+                /\d+/.test(sentence)
+            ) {
+
+                output.push(
+                    sentence
+                );
+            }
+        }
+    );
+
+    return output;
+}
+
+function ruleSentence(sentence) {
+
+    return /muss|dürfen|darf|immer|niemals|nur|mindestens|maximal|verboten|erforderlich|wichtig|sicher|beachten/i
+        .test(sentence);
+}
+
+function falseVariant(sentence) {
+
+    if (
+        /\bimmer\b/i.test(sentence)
+    ) {
+
+        return sentence.replace(
+            /\bimmer\b/i,
+            "niemals"
+        );
+    }
+
+    if (
+        /\bniemals\b/i.test(sentence)
+    ) {
+
+        return sentence.replace(
+            /\bniemals\b/i,
+            "immer"
+        );
+    }
+
+    if (
+        /\bmuss\b/i.test(sentence)
+    ) {
+
+        return sentence.replace(
+            /\bmuss\b/i,
+            "darf nicht"
+        );
+    }
+
+    if (
+        /\bnicht\b/i.test(sentence)
+    ) {
+
+        return sentence.replace(
+            /\bnicht\b/i,
+            ""
+        );
+    }
+
+    return (
+        sentence +
+        " Diese Aussage ist nicht korrekt."
+    );
+}
+
+/* =========================================================
+   FRAGEN GENERIEREN
+========================================================= */
+
+function createMCQuestion(
+    sentence,
+    words,
+    index
+) {
+
+    const keyword =
+        words[0] || "Aussage";
+
+    let questionText =
+        `Welche Aussage entspricht dem Unterrichtsmaterial?`;
+
+    let correct =
+        sentence;
+
+    let wrong1 =
+        falseVariant(sentence);
+
+    let wrong2 =
+        sentence.replace(
+            keyword,
+            "Eine andere Maßnahme"
+        );
+
+    let wrong3 =
+        sentence.replace(
+            /\bist\b/i,
+            "ist nicht"
+        );
+
+    const options = [
+        correct,
+        wrong1,
+        wrong2,
+        wrong3
+    ];
+
+    for (
+        let i = options.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() *
+                (i + 1)
+            );
+
+        [
+            options[i],
+            options[j]
+        ] =
+        [
+            options[j],
+            options[i]
+        ];
+    }
+
+    return {
+
+        type: "mc",
+
+        question:
+            questionText,
+
+        options,
+
+        correctAnswer:
+            options.indexOf(
+                correct
+            )
+    };
+}
+
+function createTrueFalseQuestion(
+    sentence
+) {
+
+    const makeFalse =
+        Math.random() < .5;
+
+    return {
+
+        type: "truefalse",
+
+        question:
+            makeFalse
+                ? `Ist folgende Aussage richtig?\n\n${falseVariant(sentence)}`
+                : `Ist folgende Aussage richtig?\n\n${sentence}`,
+
+        correctAnswer:
+            !makeFalse
+    };
+}
+
+function createTextQuestion(
+    sentence
+) {
+
+    const words =
+        importantWords(
+            sentence
+        );
+
+    const keyword =
+        words[0] ||
+        "Aussage";
+
+    return {
+
+        type: "text",
+
+        question:
+            `Erkläre den Zusammenhang von „${keyword}“ anhand des Unterrichtsmaterials.`,
+
+        correctAnswer: sentence
+    };
+}
+
+function generateQuestions(
+    material,
+    count,
+    difficulty
+) {
+
+    const sentences =
+        splitSentences(
+            material
+        );
+
+    if (
+        sentences.length < 2
+    ) {
+
+        throw new Error(
+            "Das Unterrichtsmaterial ist zu kurz. Bitte mehr Material einfügen."
+        );
+    }
+
+    const definitions =
+        extractDefinitions(
+            sentences
+        );
+
+    const numbers =
+        extractNumbers(
+            sentences
+        );
+
+    const rules =
+        sentences.filter(
+            ruleSentence
+        );
+
+    const candidates = [];
+
+    definitions.forEach(
+        item => {
+
+            candidates.push(
+                createMCQuestion(
+                    item.sentence,
+                    importantWords(
+                        item.sentence
+                    )
+                )
+            );
+
+            candidates.push(
+                createTextQuestion(
+                    item.sentence
+                )
+            );
+        }
+    );
+
+    numbers.forEach(
+        sentence => {
+
+            candidates.push(
+                createMCQuestion(
+                    sentence,
+                    importantWords(
+                        sentence
+                    )
+                )
+            );
+
+            candidates.push(
+                createTrueFalseQuestion(
+                    sentence
+                )
+            );
+        }
+    );
+
+    rules.forEach(
+        sentence => {
+
+            candidates.push(
+                createTrueFalseQuestion(
+                    sentence
+                )
+            );
+
+            candidates.push(
+                createMCQuestion(
+                    sentence,
+                    importantWords(
+                        sentence
+                    )
+                )
+            );
+        }
+    );
+
+    sentences.forEach(
+        sentence => {
+
+            candidates.push(
+                createMCQuestion(
+                    sentence,
+                    importantWords(
+                        sentence
+                    )
+                )
+            );
+        }
+    );
+
+    candidates.sort(
+        () => Math.random() - .5
+    );
+
+    const unique = [];
+
+    const used =
+        new Set();
+
+    for (
+        const question
+        of candidates
+    ) {
+
+        const key =
+            question.question
+                .trim()
+                .toLowerCase();
+
+        if (
+            !used.has(key)
+        ) {
+
+            used.add(key);
+
+            unique.push(
+                question
+            );
+        }
+
+        if (
+            unique.length >= count
+        ) {
+            break;
+        }
+    }
+
+    if (
+        unique.length < count
+    ) {
+
+        for (
+            const sentence
+            of sentences
+        ) {
+
+            if (
+                unique.length >= count
+            ) {
+                break;
+            }
+
+            unique.push(
+                createTextQuestion(
+                    sentence
+                )
+            );
+        }
+    }
+
+    return unique.slice(
+        0,
+        count
+    );
+}
+
+/* =========================================================
+   PRÜFUNG ERSTELLEN
+========================================================= */
+
+function createExam() {
+
+    const title =
+        document.getElementById(
+            "examTitle"
+        ).value.trim();
+
+    const material =
+        document.getElementById(
+            "material"
+        ).value.trim();
+
+    const count =
+        Number(
+            document.getElementById(
+                "questionCount"
+            ).value
+        );
+
+    const passPercent =
+        Number(
+            document.getElementById(
+                "passPercent"
+            ).value
+        );
+
+    const duration =
+        Number(
+            document.getElementById(
+                "examDuration"
+            ).value
+        );
+
+    const difficulty =
+        document.getElementById(
+            "difficulty"
+        ).value;
+
+    if (!title) {
+
+        showToast(
+            "Bitte einen Prüfungstitel eingeben."
+        );
+
+        return;
+    }
+
+    if (
+        material.length < 100
+    ) {
+
+        showToast(
+            "Bitte deutlich mehr Unterrichtsmaterial einfügen."
+        );
+
+        return;
+    }
+
+    if (
+        !count ||
+        count < 1
+    ) {
+
+        showToast(
+            "Bitte eine gültige Fragenanzahl eingeben."
+        );
+
+        return;
+    }
+
+    try {
+
+        const questions =
+            generateQuestions(
+                material,
+                count,
+                difficulty
+            );
+
+        if (
+            questions.length === 0
+        ) {
+
+            showToast(
+                "Es konnten keine Fragen erstellt werden."
+            );
+
+            return;
+        }
+
+        const exam = {
+
+            id: uid(),
+
+            title,
+
+            code:
+                generateExamCode(),
+
+            passPercent:
+                passPercent || 50,
+
+            duration:
+                duration || 30,
+
+            difficulty,
+
+            material,
+
+            questions,
+
+            createdAt:
+                new Date().toISOString()
+        };
+
+        exams.push(exam);
+
+        saveJSON(
+            STORAGE_EXAMS,
+            exams
+        );
+
+        showToast(
+            "Prüfung erfolgreich erstellt."
+        );
+
+        openAdminTab(
+            "exams"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            error.message ||
+            "Fehler beim Erstellen."
+        );
+    }
+}
+
+/* =========================================================
+   PRÜFUNGEN
+========================================================= */
+
+function renderExams() {
+
+    const container =
+        document.getElementById(
+            "adminContent"
+        );
+
+    if (
+        exams.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="card">
+
+                <h2>📝 Prüfungen</h2>
+
+                <br>
+
+                <p class="muted">
+                    Noch keine Prüfungen vorhanden.
+                </p>
+
+                <br>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openAdminTab('create')">
+                    Erste Prüfung erstellen
+                </button>
+
+            </div>
+        `;
+
+        return;
+    }
+
+    let rows = "";
+
+    exams.forEach(
+        exam => {
+
+            rows += `
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(
+                                exam.title
+                            )}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <span class="badge badge-red">
+                            ${exam.code}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${exam.questions.length}
+                    </td>
+
+                    <td>
+                        ${exam.passPercent}%
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn"
+                            onclick="copyExamLink('${exam.code}')">
+                            🔗 Link
+                        </button>
+
+                        <button
+                            class="btn btn-danger"
+                            onclick="deleteExam('${exam.id}')">
+                            Löschen
+                        </button>
+
+                    </td>
+
+                </tr>
+            `;
+        }
+    );
+
+    container.innerHTML = `
+
+        <div class="card">
+
+            <h2>📝 Meine Prüfungen</h2>
+
+            <br>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Prüfung</th>
+                            <th>Code</th>
+                            <th>Fragen</th>
+                            <th>Bestehen</th>
+                            <th>Aktionen</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+                        ${rows}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    `;
+}
+
+function deleteExam(id) {
+
+    const exam =
+        exams.find(
+            item =>
+                item.id === id
+        );
+
+    if (!exam) {
+        return;
+    }
+
+    if (
+        !confirm(
+            `Prüfung "${exam.title}" wirklich löschen?`
+        )
+    ) {
+        return;
+    }
+
+    exams =
+        exams.filter(
+            item =>
+                item.id !== id
+        );
+
+    saveJSON(
+        STORAGE_EXAMS,
+        exams
+    );
+
+    renderExams();
+
+    showToast(
+        "Prüfung gelöscht."
+    );
+}
+
+function copyExamLink(code) {
+
+    const url =
+        location.origin +
+        location.pathname +
+        "?pruefung=" +
+        encodeURIComponent(
+            code
+        );
+
+    navigator.clipboard
+        .writeText(url)
+        .then(() => {
+
+            showToast(
+                "Teilnehmer-Link kopiert."
+            );
+
+        })
+        .catch(() => {
+
+            prompt(
+                "Teilnehmer-Link:",
+                url
+            );
+        });
+}
+
+/* =========================================================
+   ERGEBNISSE
+========================================================= */
+
+function renderResults() {
+
+    const container =
+        document.getElementById(
+            "adminContent"
+        );
+
+    if (
+        results.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="card">
+
+                <h2>📊 Ergebnisse</h2>
+
+                <br>
+
+                <p class="muted">
+                    Noch keine Ergebnisse vorhanden.
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+    const sorted =
+        [...results].reverse();
+
+    let rows = "";
+
+    sorted.forEach(
+        result => {
+
+            const status =
+                result.needsManualCorrection
+                    ? `<span class="badge badge-yellow">Korrektur</span>`
+                    : result.passed
+                        ? `<span class="badge badge-green">Bestanden</span>`
+                        : `<span class="badge badge-red">Nicht bestanden</span>`;
+
+            rows += `
+
+                <tr>
+
+                    <td>
+                        ${escapeHTML(
+                            result.participant.firstName
+                        )}
+                        ${escapeHTML(
+                            result.participant.lastName
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            result.examTitle
+                        )}
+                    </td>
+
+                    <td>
+                        ${result.percent}%
+                    </td>
+
+                    <td>
+                        ${status}
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn"
+                            onclick="showResultAdmin('${result.id}')">
+                            Anzeigen
+                        </button>
+
+                    </td>
+
+                </tr>
+            `;
+        }
+    );
+
+    container.innerHTML = `
+
+        <div class="card">
+
+            <h2>📊 Prüfungsergebnisse</h2>
+
+            <br>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Teilnehmer</th>
+                            <th>Prüfung</th>
+                            <th>Ergebnis</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+                        ${rows}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    `;
+}
+
+function showResultAdmin(id) {
+
+    const result =
+        results.find(
+            item =>
+                item.id === id
+        );
+
+    if (!result) {
+        return;
+    }
+
+    const exam =
+        exams.find(
+            item =>
+                item.id ===
+                result.examId
+        );
+
+    if (!exam) {
+        return;
+    }
+
+    let html = `
+
+        <h2>
+            Ergebnis:
+            ${escapeHTML(
+                result.participant.firstName
+            )}
+            ${escapeHTML(
+                result.participant.lastName
+            )}
+        </h2>
+
+        <p class="muted">
+            ${escapeHTML(
+                result.examTitle
+            )}
+        </p>
+
+        <br>
+    `;
+
+    exam.questions.forEach(
+        (question, index) => {
+
+            const answer =
+                result.answers[index];
+
+            const qr =
+                result.questionResults.find(
+                    item =>
+                        item.index === index
+                );
+
+            html += `
+
+                <div class="card"
+                     style="margin-bottom:12px">
+
+                    <strong>
+                        Frage ${index + 1}
+                    </strong>
+
+                    <p style="margin:10px 0">
+                        ${escapeHTML(
+                            question.question
+                        )}
+                    </p>
+
+                    <p>
+                        <span class="muted">
+                            Antwort:
+                        </span><br>
+
+                        ${escapeHTML(
+                            answer === null ||
+                            answer === undefined ||
+                            answer === ""
+                                ? "Keine Antwort"
+                                : typeof answer === "boolean"
+                                    ? answer
+                                        ? "Richtig"
+                                        : "Falsch"
+                                    : question.type === "mc"
+                                        ? question.options[answer]
+                                        : answer
+                        )}
+                    </p>
+
+                    ${
+                        question.type === "text"
+                        ? `
+                            <p class="warning">
+                                ✏️ Manuelle Korrektur erforderlich
+                            </p>
+                        `
+                        : `
+                            <p class="${
+                                qr.correct
+                                    ? "success"
+                                    : "failed"
+                            }">
+                                ${
+                                    qr.correct
+                                        ? "✓ Richtig"
+                                        : "✕ Falsch"
+                                }
+                            </p>
+                        `
+                    }
+
+                </div>
+            `;
+        }
+    );
+
+    if (
+        result.needsManualCorrection
+    ) {
+
+        html += `
+
+            <div class="card">
+
+                <h3>
+                    ✏️ Manuelle Korrektur
+                </h3>
+
+                <p class="muted">
+                    Trage die zusätzlichen Punkte
+                    für die Freitextfragen ein.
+                </p>
+
+                <br>
+
+                <input
+                    id="manualPoints"
+                    type="number"
+                    min="0"
+                    value="${result.manualPoints || 0}">
+
+                <br><br>
+
+                <button
+                    class="btn btn-success"
+                    onclick="saveManualCorrection('${result.id}')">
+                    Korrektur speichern
+                </button>
+
+            </div>
+        `;
+    }
+
+    html += `
+
+        <br>
+
+        <button
+            class="btn"
+            onclick="closeModal()">
+            Schließen
+        </button>
+    `;
+
+    openModal(html);
+}
+
+function saveManualCorrection(id) {
+
+    const result =
+        results.find(
+            item =>
+                item.id === id
+        );
+
+    if (!result) {
+        return;
+    }
+
+    const points =
+        Number(
+            document.getElementById(
+                "manualPoints"
+            ).value
+        );
+
+    if (
+        !Number.isFinite(points) ||
+        points < 0
+    ) {
+
+        showToast(
+            "Ungültige Punktzahl."
+        );
+
+        return;
+    }
+
+    result.manualPoints =
+        points;
+
+    result.needsManualCorrection =
+        false;
+
+    const total =
+        result.automaticPoints +
+        result.manualPoints;
+
+    result.percent =
+        result.maxAutomaticPoints > 0
+            ? Math.round(
+                total /
+                result.maxAutomaticPoints *
+                100
+            )
+            : 0;
+
+    const exam =
+        exams.find(
+            item =>
+                item.id ===
+                result.examId
+        );
+
+    result.passed =
+        exam
+            ? result.percent >=
+                Number(
+                    exam.passPercent
+                )
+            : false;
+
+    saveJSON(
+        STORAGE_RESULTS,
+        results
+    );
+
+    closeModal();
+
+    renderResults();
+
+    showToast(
+        "Korrektur gespeichert."
+    );
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(content) {
+
+    document.getElementById(
+        "modalContent"
+    ).innerHTML = content;
+
+    document.getElementById(
+        "modal"
+    ).classList.remove(
+        "hidden"
+    );
+}
+
+function closeModal() {
+
+    document.getElementById(
+        "modal"
+    ).classList.add(
+        "hidden"
+    );
+}
+
+/* =========================================================
+   URL-PRÜFUNGSCODE
+========================================================= */
+
+function checkURLExam() {
+
+    const params =
+        new URLSearchParams(
+            location.search
+        );
+
+    const code =
+        params.get(
+            "pruefung"
+        );
+
+    if (!code) {
+        return false;
+    }
+
+    const exam =
+        exams.find(
+            item =>
+                item.code ===
+                code.toUpperCase()
+        );
+
+    if (!exam) {
+
+        showToast(
+            "Der Prüfungslink ist ungültig oder die Prüfung wurde auf diesem Gerät noch nicht erstellt."
+        );
+
+        showParticipant();
+
+        return true;
+    }
+
+    showParticipant();
+
+    document.getElementById(
+        "examCode"
+    ).value =
+        exam.code;
+
+    return true;
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+function initialize() {
+
+    if (
+        checkURLExam()
+    ) {
+        return;
+    }
+
+    showHome();
+}
+
+initialize();
+
+</script>
+
+</body>
+</html>
