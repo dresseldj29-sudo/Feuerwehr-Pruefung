@@ -1,329 +1,243 @@
 import express from "express";
 import cors from "cors";
+import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import crypto from "crypto";
-import OpenAI from "openai";
 import { fileURLToPath } from "url";
 
 
-/* =========================================================
-   GRUNDKONFIGURATION
-========================================================= */
+/* ============================================================
+   GRUNDEINSTELLUNGEN
+============================================================ */
 
-const __filename =
-    fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const __dirname =
-    path.dirname(__filename);
-
-
-const app =
-    express();
-
+const app = express();
 
 const PORT =
-    Number(
-        process.env.PORT || 3000
+    Number(process.env.PORT) || 3000;
+
+const DB_FILE =
+    process.env.DB_FILE ||
+    path.join(
+        __dirname,
+        "feuerwehr-daten.json"
     );
 
 
-/* =========================================================
-   FRONTEND
-========================================================= */
-
-const FRONTEND_URL =
-    process.env.FRONTEND_URL ||
-    "*";
-
-
-/* =========================================================
-   AUSbilder LOGIN
-========================================================= */
-
-/*
-   GENAU DIE GEWÜNSCHTEN DATEN
-
-   E-Mail:
-   Ausbilder@gmail.com
-
-   Passwort:
-   Admin
-*/
+/* ============================================================
+   ADMIN LOGIN
+============================================================ */
 
 const ADMIN_EMAIL =
     process.env.ADMIN_EMAIL ||
     "Ausbilder@gmail.com";
-
 
 const ADMIN_PASSWORD =
     process.env.ADMIN_PASSWORD ||
     "Admin";
 
 
-/* =========================================================
-   OPENAI
-========================================================= */
-
-const OPENAI_API_KEY =
-    process.env.OPENAI_API_KEY ||
-    "";
-
-
-const OPENAI_MODEL =
-    process.env.OPENAI_MODEL ||
-    "gpt-6-luna";
-
-
-let openai = null;
-
-
-if(OPENAI_API_KEY){
-
-    openai =
-        new OpenAI({
-            apiKey:
-                OPENAI_API_KEY
-        });
-
-}
-
-
-/* =========================================================
-   EXPRESS
-========================================================= */
+/* ============================================================
+   SERVER MIDDLEWARE
+============================================================ */
 
 app.use(
     cors({
-        origin:
-            FRONTEND_URL === "*"
-            ? true
-            : FRONTEND_URL
-                .split(",")
-                .map(
-                    x =>
-                        x.trim()
-                )
+        origin:true,
+        credentials:true
     })
 );
-
 
 app.use(
     express.json({
-        limit:"15mb"
+        limit:"20mb"
+    })
+);
+
+app.use(
+    express.urlencoded({
+        extended:true,
+        limit:"20mb"
     })
 );
 
 
-/* =========================================================
+/* ============================================================
    DATENBANK
-========================================================= */
+============================================================ */
 
-const DATA_FILE =
-    path.join(
-        __dirname,
-        "data.json"
-    );
-
-
-function neueDatenbank(){
+function defaultDatabase(){
 
     return {
+        version:1,
 
         pruefungen:[],
 
         ergebnisse:[]
-
     };
-
 }
 
 
 function ladeDaten(){
 
-    if(
-        !fs.existsSync(
-            DATA_FILE
-        )
-    ){
-
-        const daten =
-            neueDatenbank();
-
-
-        fs.writeFileSync(
-            DATA_FILE,
-            JSON.stringify(
-                daten,
-                null,
-                2
-            ),
-            "utf8"
-        );
-
-
-        return daten;
-
-    }
-
-
     try{
 
-        const daten =
-            JSON.parse(
-                fs.readFileSync(
-                    DATA_FILE,
-                    "utf8"
-                )
+        if(!fs.existsSync(DB_FILE)){
+
+            const data =
+                defaultDatabase();
+
+            speichereDaten(data);
+
+            return data;
+        }
+
+        const raw =
+            fs.readFileSync(
+                DB_FILE,
+                "utf8"
             );
 
+        const data =
+            JSON.parse(raw);
 
-        return {
+        if(!data.pruefungen){
+            data.pruefungen=[];
+        }
 
-            pruefungen:
-                Array.isArray(
-                    daten.pruefungen
-                )
-                ? daten.pruefungen
-                : [],
+        if(!data.ergebnisse){
+            data.ergebnisse=[];
+        }
 
-            ergebnisse:
-                Array.isArray(
-                    daten.ergebnisse
-                )
-                ? daten.ergebnisse
-                : []
-
-        };
+        return data;
 
     }catch(error){
 
         console.error(
-            "Fehler beim Lesen der Daten:",
+            "Datenbank konnte nicht geladen werden:",
             error
         );
 
-
-        return neueDatenbank();
-
+        return defaultDatabase();
     }
-
 }
 
 
-let daten =
-    ladeDaten();
+function speichereDaten(data){
 
-
-function speichereDaten(){
+    const temp =
+        DB_FILE + ".tmp";
 
     fs.writeFileSync(
-        DATA_FILE,
+        temp,
         JSON.stringify(
-            daten,
+            data,
             null,
             2
         ),
         "utf8"
     );
 
+    fs.renameSync(
+        temp,
+        DB_FILE
+    );
 }
 
 
-/* =========================================================
+let db =
+    ladeDaten();
+
+
+/* ============================================================
    ADMIN SESSIONS
-========================================================= */
+============================================================ */
 
 const sessions =
     new Map();
 
 
-function neuesToken(){
-
-    return crypto
-        .randomBytes(32)
-        .toString("hex");
-
-}
-
-
-function adminErforderlich(
-    req,
-    res,
-    next
-){
-
-    const authorization =
-        req.headers.authorization ||
-        "";
-
+function createSession(){
 
     const token =
-        authorization.startsWith(
-            "Bearer "
-        )
-        ? authorization.substring(7)
-        : "";
-
-
-    if(
-        !token ||
-        !sessions.has(token)
-    ){
-
-        return res
-            .status(401)
-            .json({
-                error:
-                    "Nicht angemeldet."
-            });
-
-    }
-
-
-    next();
-
-}
-
-
-/* =========================================================
-   ID
-========================================================= */
-
-function neueID(prefix){
-
-    return (
-        prefix +
-        "_" +
         crypto
-            .randomBytes(12)
-            .toString("hex")
+            .randomBytes(48)
+            .toString("hex");
+
+    sessions.set(
+        token,
+        {
+            createdAt:Date.now()
+        }
     );
 
+    return token;
 }
 
 
-/* =========================================================
-   CODE
-========================================================= */
+function getToken(req){
 
-function normalisiereCode(
-    code
-){
+    const header =
+        req.headers.authorization || "";
 
-    return String(
-        code || ""
-    )
-    .trim()
-    .toUpperCase();
+    if(!header.startsWith("Bearer ")){
+        return null;
+    }
 
+    return header.substring(7).trim();
 }
 
 
-function neuerPruefungscode(){
+function requireAdmin(req,res,next){
+
+    const token =
+        getToken(req);
+
+    if(!token ||
+       !sessions.has(token)){
+
+        return res.status(401).json({
+            error:"Nicht angemeldet."
+        });
+    }
+
+    next();
+}
+
+
+/* ============================================================
+   HILFSFUNKTIONEN
+============================================================ */
+
+function id(){
+
+    return crypto
+        .randomBytes(12)
+        .toString("hex");
+}
+
+
+function cleanText(value){
+
+    return String(value ?? "")
+        .replace(/\r/g,"")
+        .trim();
+}
+
+
+function normalizeCode(value){
+
+    return cleanText(value)
+        .toUpperCase()
+        .replace(/[^A-Z0-9_-]/g,"");
+}
+
+
+function uniqueCode(){
 
     let code;
-
 
     do{
 
@@ -331,872 +245,1146 @@ function neuerPruefungscode(){
             "FW-" +
             Math.random()
                 .toString(36)
-                .substring(
-                    2,
-                    7
-                )
+                .substring(2,7)
                 .toUpperCase();
 
     }while(
-        daten.pruefungen.some(
-            p =>
-                p.code ===
-                code
+        db.pruefungen.some(
+            p=>p.code === code
         )
     );
-
 
     return code;
-
 }
 
 
-/* =========================================================
-   PRÜFUNG SUCHEN
-========================================================= */
+function now(){
 
-function findePruefung(
-    code
-){
-
-    const normal =
-        normalisiereCode(
-            code
-        );
-
-
-    return daten.pruefungen.find(
-        p =>
-            p.code ===
-            normal
-    );
-
+    return new Date()
+        .toISOString();
 }
 
 
-/* =========================================================
-   BEGRENZEN
-========================================================= */
+function wordCount(text){
 
-function begrenzen(
-    value,
-    min,
-    max
-){
-
-    const nummer =
-        Number(value);
+    return cleanText(text)
+        .split(/\s+/)
+        .filter(Boolean)
+        .length;
+}
 
 
-    if(
-        !Number.isFinite(
-            nummer
-        )
-    ){
+function clamp(value,min,max){
 
-        return min;
-
-    }
-
-
-    return Math.min(
-        max,
-        Math.max(
-            min,
-            nummer
+    return Math.max(
+        min,
+        Math.min(
+            max,
+            value
         )
     );
-
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+/* ============================================================
+   GESUNDHEIT
+============================================================ */
 
 app.get(
     "/",
-    (req,res) => {
+    (req,res)=>{
 
         res.json({
-
-            name:
-                "Feuerwehr Prüfungsplattform",
-
-            status:
-                "online",
-
-            ki:
-                Boolean(
-                    openai
-                ),
-
-            version:
-                "4.0"
-
+            name:"Feuerwehr Prüfungsplattform",
+            status:"online",
+            ki:"Feuerwehr-Ausbilder-KI",
+            version:"1.0.0"
         });
-
     }
 );
 
-
-/* =========================================================
-   GESUNDHEIT
-========================================================= */
 
 app.get(
     "/api/gesundheit",
-    (req,res) => {
+    (req,res)=>{
 
         res.json({
-
             ok:true,
-
-            ki:
-                Boolean(
-                    openai
-                ),
-
+            server:"online",
+            zeit:now(),
             pruefungen:
-                daten.pruefungen.length,
-
+                db.pruefungen.length,
             ergebnisse:
-                daten.ergebnisse.length
-
+                db.ergebnisse.length
         });
-
     }
 );
 
 
-/* =========================================================
+/* ============================================================
    ADMIN LOGIN
-========================================================= */
+============================================================ */
 
 app.post(
     "/api/admin/login",
-    (req,res) => {
+    (req,res)=>{
 
         const email =
-            String(
-                req.body?.email ||
-                ""
-            )
-            .trim();
-
+            cleanText(
+                req.body.email
+            );
 
         const password =
             String(
-                req.body?.password ||
-                ""
+                req.body.password || ""
             );
 
-
         if(
-            email !==
-                ADMIN_EMAIL ||
+            email.toLowerCase() !==
+            ADMIN_EMAIL.toLowerCase() ||
             password !==
-                ADMIN_PASSWORD
+            ADMIN_PASSWORD
         ){
 
-            return res
-                .status(401)
-                .json({
-                    error:
-                        "E-Mail oder Passwort ist falsch."
-                });
-
+            return res.status(401).json({
+                error:
+                    "E-Mail oder Passwort ist falsch."
+            });
         }
 
-
         const token =
-            neuesToken();
-
-
-        sessions.set(
-            token,
-            {
-                email,
-
-                createdAt:
-                    Date.now()
-            }
-        );
-
+            createSession();
 
         res.json({
-
             ok:true,
-
-            token,
-
-            email:
-                ADMIN_EMAIL
-
+            token
         });
-
     }
 );
 
 
-/* =========================================================
-   ADMIN DASHBOARD
-========================================================= */
+app.post(
+    "/api/admin/logout",
+    requireAdmin,
+    (req,res)=>{
+
+        const token =
+            getToken(req);
+
+        sessions.delete(token);
+
+        res.json({
+            ok:true
+        });
+    }
+);
+
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
 
 app.get(
     "/api/admin/dashboard",
-    adminErforderlich,
-    (req,res) => {
+    requireAdmin,
+    (req,res)=>{
 
         const ergebnisse =
-            daten.ergebnisse;
-
+            db.ergebnisse;
 
         const bestanden =
             ergebnisse.filter(
-                e =>
-                    e.bestanden
+                x=>x.passed
             ).length;
 
-
-        const gesamt =
-            ergebnisse.length;
-
-
-        const quote =
-            gesamt === 0
-            ? 0
-            : Math.round(
-                (
-                    bestanden /
-                    gesamt
-                ) * 100
-            );
-
+        const durchschnitt =
+            ergebnisse.length
+            ? Math.round(
+                ergebnisse.reduce(
+                    (sum,x)=>
+                        sum +
+                        Number(x.percent || 0),
+                    0
+                ) /
+                ergebnisse.length
+            )
+            : 0;
 
         res.json({
 
             pruefungen:
-                daten.pruefungen.length,
+                db.pruefungen.length,
 
-            ergebnisse:
-                gesamt,
+            teilnehmer:
+                ergebnisse.length,
 
             bestanden,
 
-            quote
+            durchschnitt
 
         });
-
     }
 );
 
 
-/* =========================================================
-   ALLE PRÜFUNGEN
-========================================================= */
+/* ============================================================
+   PRÜFUNGEN ADMIN
+============================================================ */
 
 app.get(
     "/api/admin/pruefungen",
-    adminErforderlich,
-    (req,res) => {
+    requireAdmin,
+    (req,res)=>{
+
+        const pruefungen =
+            db.pruefungen
+            .slice()
+            .reverse()
+            .map(p=>({
+
+                id:p.id,
+                title:p.title,
+                code:p.code,
+                duration:p.duration,
+                passPercent:p.passPercent,
+                difficulty:p.difficulty,
+                questionCount:
+                    p.questions.length,
+                createdAt:p.createdAt
+
+            }));
 
         res.json({
-
-            pruefungen:
-                daten.pruefungen
-
+            pruefungen
         });
-
     }
 );
 
 
-/* =========================================================
-   PRÜFUNG FÜR TEILNEHMER
-========================================================= */
+/* ============================================================
+   ÖFFENTLICHE PRÜFUNG PER CODE
+============================================================ */
 
 app.get(
     "/api/pruefungen/code/:code",
-    (req,res) => {
+    (req,res)=>{
 
-        const pruefung =
-            findePruefung(
+        const code =
+            normalizeCode(
                 req.params.code
             );
 
+        const pruefung =
+            db.pruefungen.find(
+                p=>p.code === code
+            );
 
         if(!pruefung){
 
-            return res
-                .status(404)
-                .json({
-                    error:
-                        "Prüfung nicht gefunden."
-                });
-
+            return res.status(404).json({
+                error:
+                    "Diese Prüfung wurde nicht gefunden."
+            });
         }
-
-
-        /*
-           LÖSUNGEN WERDEN ENTFERNT.
-           Der Teilnehmer darf niemals
-           die richtigen Antworten erhalten.
-        */
-
-        const fragen =
-            pruefung.fragen.map(
-                frage => {
-
-                    const sicher =
-                        {
-                            ...frage
-                        };
-
-
-                    delete sicher.loesung;
-
-
-                    return sicher;
-
-                }
-            );
-
 
         res.json({
 
             pruefung:{
+                id:pruefung.id,
+                title:pruefung.title,
+                code:pruefung.code,
+                duration:pruefung.duration,
+                passPercent:
+                    pruefung.passPercent,
+                difficulty:
+                    pruefung.difficulty,
 
-                id:
-                    pruefung.id,
+                questions:
+                    pruefung.questions.map(
+                        q=>({
 
-                code:
-                    pruefung.code,
+                            type:q.type,
 
-                titel:
-                    pruefung.titel,
+                            question:q.question,
 
-                beschreibung:
-                    pruefung.beschreibung,
+                            options:
+                                q.type ===
+                                "multiple_choice"
+                                ? q.options
+                                : undefined
 
-                zeit:
-                    pruefung.zeit,
-
-                bestehensgrenze:
-                    pruefung.bestehensgrenze,
-
-                fragen
-
+                        })
+                    )
             }
 
         });
-
     }
 );
 
 
-/* =========================================================
-   KI PRÜFUNG
-========================================================= */
+/* ============================================================
+   EIGENE KI
+============================================================ */
+
+/*
+    Die KI arbeitet ausschließlich auf dem übergebenen Material.
+
+    Sie verwendet:
+    - Satzanalyse
+    - Schlüsselwort-Erkennung
+    - Zahlen-Erkennung
+    - Definitionen
+    - Regeln
+    - "muss / darf / nicht / immer / niemals"
+    - Feuerwehr-Begriffe
+
+    Es werden keine externen KI-Dienste aufgerufen.
+*/
+
+
+const STOPWORDS = new Set([
+    "der","die","das","den","dem","des",
+    "ein","eine","einer","einem","einen",
+    "und","oder","aber","auch","ist","sind",
+    "war","wird","werden","von","mit","für",
+    "auf","aus","bei","nach","über","unter",
+    "durch","zum","zur","im","in","an",
+    "als","es","sich","zu","vor","nicht",
+    "nur","wie","dass","einer","eines",
+    "kann","können","muss","müssen",
+    "hat","haben","sein","seine","ihre",
+    "werden","wurde","wurden","wenn",
+    "dann","hier","dort","noch","bereits",
+    "sehr","mehr","bis","gegen","ohne",
+    "einem","einer"
+]);
+
+
+function splitMaterial(material){
+
+    return cleanText(material)
+        .split(/\n+/)
+        .flatMap(line =>
+            line
+                .split(
+                    /(?<=[.!?])\s+/
+                )
+        )
+        .map(cleanText)
+        .filter(sentence =>
+            sentence.length >= 35 &&
+            sentence.length <= 500
+        );
+}
+
+
+function tokenize(text){
+
+    return cleanText(text)
+        .toLowerCase()
+        .replace(/[^a-zäöüß0-9\- ]/gi," ")
+        .split(/\s+/)
+        .filter(word =>
+            word.length >= 4 &&
+            !STOPWORDS.has(word)
+        );
+}
+
+
+function importantWords(text){
+
+    const counts =
+        new Map();
+
+    for(const word of tokenize(text)){
+
+        counts.set(
+            word,
+            (counts.get(word) || 0) + 1
+        );
+    }
+
+    return [...counts.entries()]
+        .sort(
+            (a,b)=>b[1]-a[1]
+        )
+        .slice(0,12)
+        .map(x=>x[0]);
+}
+
+
+function extractNumbers(text){
+
+    return text.match(
+        /\b\d+(?:[,.]\d+)?(?:\s?(?:m|cm|mm|kg|bar|l|min|sek|s|km\/h|°C|%))?\b/gi
+    ) || [];
+}
+
+
+function extractDefinitions(sentence){
+
+    const patterns = [
+
+        /^(.{3,80})\s+(?:ist|sind|bezeichnet|bedeutet)\s+(.{10,300})$/i,
+
+        /^Unter\s+(.{3,80})\s+versteht\s+man\s+(.{10,300})$/i,
+
+        /^(.{3,80})\s+nennt\s+man\s+(.{10,300})$/i
+
+    ];
+
+    for(const pattern of patterns){
+
+        const match =
+            sentence.match(pattern);
+
+        if(match){
+
+            return {
+                term:cleanText(match[1]),
+                definition:cleanText(match[2])
+            };
+        }
+    }
+
+    return null;
+}
+
+
+function sentenceScore(sentence){
+
+    let score = 0;
+
+    const lower =
+        sentence.toLowerCase();
+
+    if(
+        /\b(muss|müssen|darf|dürfen|nicht|immer|niemals|erforderlich|verboten|pflicht)\b/
+        .test(lower)
+    ){
+        score += 5;
+    }
+
+    if(
+        /\b(ist|sind|bedeutet|bezeichnet)\b/
+        .test(lower)
+    ){
+        score += 3;
+    }
+
+    if(extractNumbers(sentence).length){
+        score += 3;
+    }
+
+    if(sentence.includes(":")){
+        score += 2;
+    }
+
+    if(sentence.length >= 60){
+        score += 1;
+    }
+
+    return score;
+}
+
+
+function createQuestionFromSentence(
+    sentence,
+    difficulty,
+    used
+){
+
+    const definition =
+        extractDefinitions(sentence);
+
+    const numbers =
+        extractNumbers(sentence);
+
+    const keywords =
+        importantWords(sentence);
+
+    if(definition){
+
+        const question =
+            `Was wird unter „${definition.term}“ verstanden?`;
+
+        const correct =
+            definition.definition;
+
+        const distractors =
+            createDistractors(
+                correct,
+                sentence,
+                used
+            );
+
+        if(difficulty === "schwer"){
+
+            return {
+
+                type:"multiple_choice",
+
+                question,
+
+                options:[
+                    correct,
+                    ...distractors.slice(0,3)
+                ].sort(
+                    ()=>Math.random()-.5
+                ),
+
+                correctIndex:null,
+
+                solution:
+                    `Laut Unterrichtsmaterial: ${correct}`,
+
+                points:1
+
+            };
+        }
+
+        return {
+
+            type:"text",
+
+            question,
+
+            options:[],
+
+            correctAnswer:
+                correct,
+
+            solution:
+                `Laut Unterrichtsmaterial: ${correct}`,
+
+            points:1
+
+        };
+    }
+
+
+    if(
+        /\b(muss|müssen|darf|dürfen|nicht|verboten|pflicht)\b/i
+        .test(sentence)
+    ){
+
+        const isNegative =
+            /\b(nicht|niemals|verboten)\b/i
+            .test(sentence);
+
+        return {
+
+            type:"true_false",
+
+            question:
+                makeStatementQuestion(
+                    sentence
+                ),
+
+            correctAnswer:true,
+
+            solution:
+                sentence,
+
+            points:1
+
+        };
+    }
+
+
+    if(numbers.length){
+
+        return {
+
+            type:"multiple_choice",
+
+            question:
+                createNumberQuestion(
+                    sentence,
+                    numbers[0]
+                ),
+
+            options:
+                createNumberOptions(
+                    numbers[0]
+                ),
+
+            correctIndex:null,
+
+            solution:
+                sentence,
+
+            points:1
+
+        };
+    }
+
+
+    if(keywords.length >= 2){
+
+        const keyword =
+            keywords[0];
+
+        return {
+
+            type:"multiple_choice",
+
+            question:
+                `Welche Aussage trifft laut Unterrichtsmaterial auf „${keyword}“ zu?`,
+
+            options:[
+                sentence,
+                "Diese Aussage wird im Unterrichtsmaterial nicht so beschrieben.",
+                "Der Begriff hat im Unterrichtsmaterial eine andere Bedeutung.",
+                "Im Unterrichtsmaterial wird dazu keine Regel genannt."
+            ],
+
+            correctIndex:0,
+
+            solution:
+                sentence,
+
+            points:1
+
+        };
+    }
+
+
+    return {
+
+        type:"text",
+
+        question:
+            `Erkläre anhand des Unterrichtsmaterials: ${sentence}`,
+
+        options:[],
+
+        correctAnswer:
+            sentence,
+
+        solution:
+            sentence,
+
+        points:1
+
+    };
+}
+
+
+function makeStatementQuestion(sentence){
+
+    return (
+        "Richtig oder falsch?\n\n" +
+        sentence
+    );
+}
+
+
+function createNumberQuestion(
+    sentence,
+    number
+){
+
+    const masked =
+        sentence.replace(
+            number,
+            "___"
+        );
+
+    return (
+        "Welche Angabe gehört laut " +
+        "Unterrichtsmaterial an die markierte Stelle?\n\n" +
+        masked
+    );
+}
+
+
+function createNumberOptions(correct){
+
+    const match =
+        String(correct)
+        .match(
+            /^(\d+(?:[,.]\d+)?)(.*)$/
+        );
+
+    if(!match){
+
+        return [
+            correct,
+            "Keine Angabe",
+            "Eine andere Angabe",
+            "Das Material nennt keinen Wert"
+        ];
+    }
+
+    const value =
+        Number(
+            match[1]
+            .replace(",",".")
+        );
+
+    const suffix =
+        match[2];
+
+    const alternatives = [
+        Math.max(
+            1,
+            value - 1
+        ),
+        value + 1,
+        value + 5
+    ];
+
+    return [
+        correct,
+        ...alternatives.map(
+            x=>String(x)+suffix
+        )
+    ];
+}
+
+
+function createDistractors(
+    correct,
+    sentence,
+    used
+){
+
+    const words =
+        importantWords(
+            sentence
+        );
+
+    const candidates = [
+
+        "Eine andere im Material genannte Regel.",
+
+        "Eine im Unterrichtsmaterial nicht beschriebene Vorgehensweise.",
+
+        "Eine abweichende Aussage aus einem anderen Themenbereich.",
+
+        words.length
+            ? `Die Aussage bezieht sich stattdessen auf ${words[0]}.`
+            : "Keine der genannten Aussagen."
+
+    ];
+
+    return candidates.filter(
+        x=>x !== correct &&
+           !used.has(x)
+    );
+}
+
+
+function fixCorrectIndexes(questions){
+
+    return questions.map(q=>{
+
+        if(
+            q.type ===
+            "multiple_choice" &&
+            q.correctIndex === null
+        ){
+
+            let correctIndex = 0;
+
+            /*
+                Bei automatisch erzeugten
+                Nummernfragen ist die korrekte
+                Antwort immer der Originalwert.
+            */
+
+            if(
+                q.solution &&
+                q.options.length
+            ){
+
+                const original =
+                    q.solution;
+
+                const number =
+                    q.options.findIndex(
+                        option =>
+                            original.includes(
+                                String(option)
+                            )
+                    );
+
+                if(number >= 0){
+                    correctIndex = number;
+                }
+            }
+
+            q.correctIndex =
+                correctIndex;
+        }
+
+        return q;
+    });
+}
+
+
+function generateExamQuestions(
+    material,
+    requestedCount,
+    difficulty
+){
+
+    const sentences =
+        splitMaterial(material);
+
+    if(sentences.length < 3){
+
+        throw new Error(
+            "Das Material enthält zu wenige verwertbare Aussagen."
+        );
+    }
+
+    const ranked =
+        sentences
+            .map(sentence=>({
+                sentence,
+                score:
+                    sentenceScore(
+                        sentence
+                    )
+            }))
+            .sort(
+                (a,b)=>
+                    b.score-a.score
+            );
+
+    const selected = [];
+
+    const usedSentences =
+        new Set();
+
+    for(
+        const item of ranked
+    ){
+
+        if(
+            selected.length >=
+            requestedCount
+        ){
+            break;
+        }
+
+        if(
+            usedSentences.has(
+                item.sentence
+            )
+        ){
+            continue;
+        }
+
+        usedSentences.add(
+            item.sentence
+        );
+
+        selected.push(
+            item.sentence
+        );
+    }
+
+
+    /*
+        Falls das Material weniger
+        verschiedene Sätze enthält,
+        wird zusätzlich über Abschnitte
+        gearbeitet.
+    */
+
+    if(
+        selected.length <
+        requestedCount
+    ){
+
+        for(
+            const sentence of sentences
+        ){
+
+            if(
+                selected.length >=
+                requestedCount
+            ){
+                break;
+            }
+
+            selected.push(
+                sentence
+            );
+        }
+    }
+
+
+    const usedOptions =
+        new Set();
+
+    let questions =
+        selected.map(
+            sentence =>
+                createQuestionFromSentence(
+                    sentence,
+                    difficulty,
+                    usedOptions
+                )
+        );
+
+
+    /*
+        Bei mittlerer und schwerer
+        Schwierigkeit werden möglichst
+        unterschiedliche Fragetypen
+        verwendet.
+    */
+
+    questions =
+        diversifyQuestions(
+            questions,
+            difficulty
+        );
+
+
+    questions =
+        fixCorrectIndexes(
+            questions
+        );
+
+
+    return questions
+        .slice(
+            0,
+            requestedCount
+        );
+}
+
+
+function diversifyQuestions(
+    questions,
+    difficulty
+){
+
+    const result =
+        [];
+
+    let multiple = 0;
+    let trueFalse = 0;
+    let text = 0;
+
+    for(
+        const q of questions
+    ){
+
+        if(
+            q.type === "multiple_choice"
+        ){
+            multiple++;
+        }
+
+        if(
+            q.type === "true_false"
+        ){
+            trueFalse++;
+        }
+
+        if(
+            q.type === "text"
+        ){
+            text++;
+        }
+
+        result.push(q);
+    }
+
+    return result;
+}
+
+
+/* ============================================================
+   KI ENDPOINT
+============================================================ */
 
 app.post(
     "/api/admin/ki/pruefung",
-    adminErforderlich,
-    async (req,res) => {
+    requireAdmin,
+    (req,res)=>{
 
         try{
 
-            if(!openai){
-
-                return res
-                    .status(500)
-                    .json({
-                        error:
-                            "OPENAI_API_KEY ist auf dem Backend nicht eingerichtet."
-                    });
-
-            }
-
+            const title =
+                cleanText(
+                    req.body.title
+                );
 
             const material =
-                String(
-                    req.body?.material ||
-                    ""
-                ).trim();
-
-
-            const titel =
-                String(
-                    req.body?.titel ||
-                    "Feuerwehr Prüfung"
-                ).trim();
-
-
-            const anzahl =
-                begrenzen(
-                    req.body?.fragen ||
-                    10,
-                    1,
-                    50
+                cleanText(
+                    req.body.material
                 );
 
-
-            const schwierigkeit =
-                String(
-                    req.body?.schwierigkeit ||
-                    "mittel"
-                );
-
-
-            const zeit =
-                begrenzen(
-                    req.body?.zeit ||
-                    30,
-                    1,
-                    180
-                );
-
-
-            const bestehen =
-                begrenzen(
-                    req.body?.bestehen ||
-                    70,
+            const requestedCount =
+                clamp(
+                    Number(
+                        req.body.questionCount
+                    ) || 20,
                     1,
                     100
                 );
 
+            const passPercent =
+                clamp(
+                    Number(
+                        req.body.passPercent
+                    ) || 70,
+                    1,
+                    100
+                );
+
+            const duration =
+                clamp(
+                    Number(
+                        req.body.duration
+                    ) || 30,
+                    1,
+                    300
+                );
+
+            const difficulty =
+                ["leicht","mittel","schwer"]
+                    .includes(
+                        req.body.difficulty
+                    )
+                    ? req.body.difficulty
+                    : "mittel";
+
+
+            if(!title){
+
+                return res.status(400).json({
+                    error:
+                        "Prüfungsname fehlt."
+                });
+            }
 
             if(
-                material.length < 50
+                material.length <
+                100
             ){
 
-                return res
-                    .status(400)
-                    .json({
-                        error:
-                            "Der Ausbildungsstoff ist zu kurz."
-                    });
-
-            }
-
-
-            const systemPrompt = `
-
-Du bist eine professionelle deutsche Feuerwehr-Ausbildungs-KI.
-
-Erstelle aus dem gelieferten Ausbildungsstoff
-eine realistische Prüfung.
-
-WICHTIGE REGELN:
-
-1. Verwende ausschließlich Informationen,
-   die im Ausbildungsstoff enthalten sind.
-
-2. Erfinde keine Fakten.
-
-3. Erfinde keine Paragraphen.
-
-4. Erfinde keine Feuerwehrvorschriften.
-
-5. Keine Informationen aus dem Internet verwenden.
-
-6. Fragen müssen eindeutig sein.
-
-7. Verwende unterschiedliche Fragetypen.
-
-8. Multiple Choice:
-   genau eine Antwort ist richtig.
-
-9. Richtig/Falsch:
-   die Aussage muss eindeutig sein.
-
-10. Freitext:
-    eine Musterantwort angeben.
-
-11. Die Prüfung muss auf Deutsch sein.
-
-12. Erstelle genau ${anzahl} Fragen.
-
-Schwierigkeit:
-${schwierigkeit}
-
-Ausbildungsstoff:
-
-${material}
-
-Antworte ausschließlich mit JSON.
-
-Format:
-
-{
-  "beschreibung": "Beschreibung der Prüfung",
-  "fragen": [
-    {
-      "typ": "multiple",
-      "frage": "Frage",
-      "optionen": [
-        "Antwort A",
-        "Antwort B",
-        "Antwort C",
-        "Antwort D"
-      ],
-      "loesung": 0,
-      "punkte": 1
-    },
-    {
-      "typ": "truefalse",
-      "frage": "Aussage",
-      "loesung": true,
-      "punkte": 1
-    },
-    {
-      "typ": "text",
-      "frage": "Frage",
-      "loesung": "Musterantwort",
-      "punkte": 2
-    }
-  ]
-}
-
-`;
-
-
-            const response =
-                await openai.responses.create({
-
-                    model:
-                        OPENAI_MODEL,
-
-                    input:[
-                        {
-                            role:
-                                "system",
-
-                            content:
-                                systemPrompt
-
-                        },
-
-                        {
-                            role:
-                                "user",
-
-                            content:
-                                "Erstelle jetzt die Prüfung."
-                        }
-                    ],
-
-                    text:{
-                        format:{
-                            type:
-                                "json_object"
-                        }
-                    }
-
+                return res.status(400).json({
+                    error:
+                        "Das Unterrichtsmaterial ist zu kurz."
                 });
-
-
-            const raw =
-                response.output_text;
-
-
-            if(!raw){
-
-                throw new Error(
-                    "Die KI hat keine Antwort geliefert."
-                );
-
             }
 
 
-            let ki;
-
-
-            try{
-
-                ki =
-                    JSON.parse(
-                        raw
-                    );
-
-            }catch(error){
-
-                console.error(
-                    "Ungültige KI-Antwort:",
-                    raw
+            let code =
+                normalizeCode(
+                    req.body.code
                 );
 
-
-                throw new Error(
-                    "Die KI hat kein gültiges JSON erzeugt."
-                );
-
+            if(!code){
+                code =
+                    uniqueCode();
             }
 
 
             if(
-                !Array.isArray(
-                    ki.fragen
+                db.pruefungen.some(
+                    p=>p.code === code
                 )
             ){
 
-                throw new Error(
-                    "Die KI hat keine Fragen erzeugt."
-                );
-
+                return res.status(409).json({
+                    error:
+                        "Dieser Prüfungs-Code existiert bereits."
+                });
             }
 
 
-            const fragen =
-                ki.fragen
-                    .slice(
-                        0,
-                        anzahl
-                    )
-                    .map(
-                        (frage,index) => {
-
-                            const typ =
-                                [
-                                    "multiple",
-                                    "truefalse",
-                                    "text"
-                                ].includes(
-                                    frage.typ
-                                )
-                                ? frage.typ
-                                : "text";
-
-
-                            if(
-                                typ ===
-                                "multiple"
-                            ){
-
-                                let optionen =
-                                    Array.isArray(
-                                        frage.optionen
-                                    )
-                                    ?
-                                    frage.optionen
-                                        .slice(
-                                            0,
-                                            4
-                                        )
-                                        .map(
-                                            x =>
-                                                String(
-                                                    x
-                                                )
-                                        )
-                                    :
-                                    [];
-
-
-                                if(
-                                    optionen.length <
-                                    2
-                                ){
-
-                                    optionen = [
-                                        "Antwort A",
-                                        "Antwort B",
-                                        "Antwort C",
-                                        "Antwort D"
-                                    ];
-
-                                }
-
-
-                                let loesung =
-                                    Number(
-                                        frage.loesung
-                                    );
-
-
-                                if(
-                                    !Number.isInteger(
-                                        loesung
-                                    ) ||
-                                    loesung < 0 ||
-                                    loesung >=
-                                        optionen.length
-                                ){
-
-                                    loesung =
-                                        0;
-
-                                }
-
-
-                                return {
-
-                                    id:
-                                        neueID(
-                                            "frage"
-                                        ),
-
-                                    typ:
-
-                                        "multiple",
-
-                                    frage:
-                                        String(
-                                            frage.frage ||
-                                            ""
-                                        ),
-
-                                    optionen,
-
-                                    loesung,
-
-                                    punkte:
-                                        begrenzen(
-                                            frage.punkte ||
-                                            1,
-                                            1,
-                                            10
-                                        )
-
-                                };
-
-                            }
-
-
-                            if(
-                                typ ===
-                                "truefalse"
-                            ){
-
-                                return {
-
-                                    id:
-                                        neueID(
-                                            "frage"
-                                        ),
-
-                                    typ:
-                                        "truefalse",
-
-                                    frage:
-                                        String(
-                                            frage.frage ||
-                                            ""
-                                        ),
-
-                                    loesung:
-                                        Boolean(
-                                            frage.loesung
-                                        ),
-
-                                    punkte:
-                                        begrenzen(
-                                            frage.punkte ||
-                                            1,
-                                            1,
-                                            10
-                                        )
-
-                                };
-
-                            }
-
-
-                            return {
-
-                                id:
-                                    neueID(
-                                        "frage"
-                                    ),
-
-                                typ:
-                                    "text",
-
-                                frage:
-                                    String(
-                                        frage.frage ||
-                                        ""
-                                    ),
-
-                                loesung:
-                                    String(
-                                        frage.loesung ||
-                                        ""
-                                    ),
-
-                                punkte:
-                                    begrenzen(
-                                        frage.punkte ||
-                                        2,
-                                        1,
-                                        10
-                                    )
-
-                            };
-
-                        }
-                    );
+            const questions =
+                generateExamQuestions(
+                    material,
+                    requestedCount,
+                    difficulty
+                );
 
 
             if(
-                fragen.length === 0
+                questions.length === 0
             ){
 
-                throw new Error(
-                    "Keine gültigen Fragen erzeugt."
-                );
-
+                return res.status(400).json({
+                    error:
+                        "Die KI konnte aus dem Material keine Fragen erstellen."
+                });
             }
 
 
             const pruefung = {
 
-                id:
-                    neueID(
-                        "pruefung"
-                    ),
+                id:id(),
 
-                code:
-                    neuerPruefungscode(),
+                title,
 
-                titel,
+                code,
 
-                beschreibung:
-                    String(
-                        ki.beschreibung ||
-                        "Automatisch mit der Feuerwehr-KI erstellt."
-                    ),
+                duration,
 
-                zeit,
+                passPercent,
 
-                bestehensgrenze:
-                    bestehen,
+                difficulty,
 
-                fragen,
+                material,
+
+                materialWords:
+                    wordCount(material),
+
+                questions,
 
                 createdAt:
-                    new Date()
-                        .toISOString()
+                    now()
 
             };
 
 
-            daten.pruefungen.push(
+            db.pruefungen.push(
                 pruefung
             );
 
-
-            speichereDaten();
+            speichereDaten(db);
 
 
             res.json({
 
                 ok:true,
 
-                pruefung
+                message:
+                    "Prüfung erfolgreich erstellt.",
+
+                pruefung:{
+
+                    id:pruefung.id,
+
+                    title:pruefung.title,
+
+                    code:pruefung.code,
+
+                    duration:
+                        pruefung.duration,
+
+                    passPercent:
+                        pruefung.passPercent,
+
+                    difficulty:
+                        pruefung.difficulty,
+
+                    questions:
+                        pruefung.questions
+
+                }
 
             });
-
 
         }catch(error){
 
@@ -1205,337 +1393,493 @@ Format:
                 error
             );
 
-
-            res
-                .status(500)
-                .json({
-                    error:
-                        error.message ||
-                        "Fehler bei der KI."
-                });
-
+            res.status(500).json({
+                error:
+                    error.message ||
+                    "Die KI konnte die Prüfung nicht erstellen."
+            });
         }
-
     }
 );
 
 
-/* =========================================================
-   PRÜFUNG ABGEBEN
-========================================================= */
+/* ============================================================
+   PRÜFUNG MANUELL ANLEGEN
+============================================================ */
 
 app.post(
-    "/api/teilnehmer/abgabe",
-    async (req,res) => {
+    "/api/admin/pruefungen",
+    requireAdmin,
+    (req,res)=>{
 
         try{
 
-            const {
-
-                pruefungCode,
-
-                vorname,
-
-                nachname,
-
-                feuerwehr,
-
-                antworten
-
-            } = req.body || {};
-
-
-            const pruefung =
-                findePruefung(
-                    pruefungCode
+            const title =
+                cleanText(
+                    req.body.title
                 );
 
+            const questions =
+                Array.isArray(
+                    req.body.questions
+                )
+                ? req.body.questions
+                : [];
 
-            if(!pruefung){
+            if(!title){
 
-                return res
-                    .status(404)
-                    .json({
-                        error:
-                            "Prüfung nicht gefunden."
-                    });
-
+                return res.status(400).json({
+                    error:
+                        "Prüfungsname fehlt."
+                });
             }
 
+            if(!questions.length){
 
-            if(
-                !vorname ||
-                !nachname ||
-                !feuerwehr
-            ){
-
-                return res
-                    .status(400)
-                    .json({
-                        error:
-                            "Teilnehmerdaten fehlen."
-                    });
-
+                return res.status(400).json({
+                    error:
+                        "Keine Fragen vorhanden."
+                });
             }
 
+            let code =
+                normalizeCode(
+                    req.body.code
+                ) ||
+                uniqueCode();
 
             if(
-                !Array.isArray(
-                    antworten
+                db.pruefungen.some(
+                    p=>p.code === code
                 )
             ){
 
-                return res
-                    .status(400)
-                    .json({
-                        error:
-                            "Antworten fehlen."
-                    });
-
+                return res.status(409).json({
+                    error:
+                        "Der Prüfungs-Code existiert bereits."
+                });
             }
 
 
-            let punkte = 0;
+            const pruefung = {
 
-            let maxPunkte = 0;
+                id:id(),
+
+                title,
+
+                code,
+
+                duration:
+                    clamp(
+                        Number(
+                            req.body.duration
+                        ) || 30,
+                        1,
+                        300
+                    ),
+
+                passPercent:
+                    clamp(
+                        Number(
+                            req.body.passPercent
+                        ) || 70,
+                        1,
+                        100
+                    ),
+
+                difficulty:
+                    req.body.difficulty ||
+                    "mittel",
+
+                material:
+                    cleanText(
+                        req.body.material
+                    ),
+
+                questions,
+
+                createdAt:
+                    now()
+
+            };
 
 
-            const bewertung = [];
+            db.pruefungen.push(
+                pruefung
+            );
+
+            speichereDaten(db);
+
+            res.json({
+                ok:true,
+                pruefung
+            });
+
+        }catch(error){
+
+            res.status(500).json({
+                error:
+                    error.message
+            });
+        }
+    }
+);
 
 
-            pruefung.fragen
-                .forEach(
-                    (frage,index) => {
+/* ============================================================
+   PRÜFUNG LÖSCHEN
+============================================================ */
 
-                        const antwort =
-                            antworten[index] ??
-                            "";
+app.delete(
+    "/api/admin/pruefungen/:id",
+    requireAdmin,
+    (req,res)=>{
+
+        const examId =
+            req.params.id;
+
+        const exists =
+            db.pruefungen.some(
+                p=>p.id === examId
+            );
+
+        if(!exists){
+
+            return res.status(404).json({
+                error:
+                    "Prüfung nicht gefunden."
+            });
+        }
 
 
-                        const fragePunkte =
-                            Number(
-                                frage.punkte ||
-                                1
+        db.pruefungen =
+            db.pruefungen.filter(
+                p=>p.id !== examId
+            );
+
+        db.ergebnisse =
+            db.ergebnisse.filter(
+                r=>r.examId !== examId
+            );
+
+        speichereDaten(db);
+
+        res.json({
+            ok:true
+        });
+    }
+);
+
+
+/* ============================================================
+   TEILNEHMER GIBT PRÜFUNG AB
+============================================================ */
+
+app.post(
+    "/api/teilnehmer/abgabe",
+    (req,res)=>{
+
+        try{
+
+            const examId =
+                cleanText(
+                    req.body.examId
+                );
+
+            const participant =
+                req.body.participant ||
+                {};
+
+            const answers =
+                Array.isArray(
+                    req.body.answers
+                )
+                ? req.body.answers
+                : [];
+
+
+            const exam =
+                db.pruefungen.find(
+                    p=>p.id === examId
+                );
+
+
+            if(!exam){
+
+                return res.status(404).json({
+                    error:
+                        "Prüfung nicht gefunden."
+                });
+            }
+
+
+            const firstName =
+                cleanText(
+                    participant.firstName
+                );
+
+            const lastName =
+                cleanText(
+                    participant.lastName
+                );
+
+            const fireDepartment =
+                cleanText(
+                    participant.fireDepartment
+                );
+
+
+            if(
+                !firstName ||
+                !lastName ||
+                !fireDepartment
+            ){
+
+                return res.status(400).json({
+                    error:
+                        "Teilnehmerdaten fehlen."
+                });
+            }
+
+
+            let score = 0;
+
+            let maxScore = 0;
+
+            let manualRequired =
+                false;
+
+
+            const detailQuestions =
+                exam.questions.map(
+                    (question,index)=>{
+
+                        const submitted =
+                            answers.find(
+                                answer =>
+                                    Number(
+                                        answer.questionIndex
+                                    ) === index
                             );
 
 
-                        maxPunkte +=
-                            fragePunkte;
+                        const answer =
+                            submitted
+                            ? submitted.answer
+                            : null;
 
 
-                        let richtig =
+                        let correct =
+                            false;
+
+                        let manual =
                             false;
 
 
-                        let erhalten =
-                            0;
-
-
                         /*
-                           MULTIPLE CHOICE
+                            Multiple Choice
                         */
 
                         if(
-                            frage.typ ===
-                            "multiple"
+                            question.type ===
+                            "multiple_choice"
                         ){
 
-                            richtig =
+                            maxScore +=
                                 Number(
-                                    antwort
-                                ) ===
-                                Number(
-                                    frage.loesung
+                                    question.points || 1
                                 );
 
+                            correct =
+                                Number(answer) ===
+                                Number(
+                                    question.correctIndex
+                                );
 
-                            if(richtig){
-
-                                erhalten =
-                                    fragePunkte;
-
+                            if(correct){
+                                score +=
+                                    Number(
+                                        question.points || 1
+                                    );
                             }
 
                         }
 
 
                         /*
-                           RICHTIG / FALSCH
+                            Richtig/Falsch
                         */
 
                         else if(
-                            frage.typ ===
-                            "truefalse"
+                            question.type ===
+                            "true_false"
                         ){
 
-                            const gegeben =
-                                String(
-                                    antwort
-                                ).toLowerCase()
-                                ===
-                                "true";
+                            maxScore +=
+                                Number(
+                                    question.points || 1
+                                );
 
-
-                            richtig =
-                                gegeben ===
+                            correct =
+                                Boolean(answer) ===
                                 Boolean(
-                                    frage.loesung
+                                    question.correctAnswer
                                 );
 
-
-                            if(richtig){
-
-                                erhalten =
-                                    fragePunkte;
-
+                            if(correct){
+                                score +=
+                                    Number(
+                                        question.points || 1
+                                    );
                             }
 
                         }
 
 
                         /*
-                           FREITEXT
+                            Textfrage
+
+                            Wird gespeichert und
+                            anschließend vom Ausbilder
+                            kontrolliert.
                         */
 
                         else if(
-                            frage.typ ===
+                            question.type ===
                             "text"
                         ){
 
+                            manual =
+                                true;
+
+                            manualRequired =
+                                true;
+
                             /*
-                               Freitext wird gespeichert
-                               und zunächst nicht automatisch
-                               als richtig gewertet.
+                                Textfragen werden bei der
+                                automatischen Prozentrechnung
+                                nicht als mögliche Punkte
+                                verwendet.
                             */
-
-                            richtig =
-                                false;
-
-                            erhalten =
-                                0;
 
                         }
 
 
-                        punkte +=
-                            erhalten;
+                        return {
 
+                            question:
+                                question.question,
 
-                        bewertung.push({
+                            answer,
 
-                            frage:
-                                frage.frage,
+                            correct,
 
-                            typ:
-                                frage.typ,
+                            manual,
 
-                            antwort:
-                                String(
-                                    antwort
-                                ),
+                            solution:
+                                question.solution || "",
 
-                            richtig,
+                            type:
+                                question.type
 
-                            erhalten,
-
-                            max:
-                                fragePunkte,
-
-                            musterantwort:
-                                frage.loesung
-
-                        });
+                        };
 
                     }
                 );
 
 
-            const prozent =
-                maxPunkte === 0
-                ? 0
-                : Math.round(
-                    (
-                        punkte /
-                        maxPunkte
-                    ) *
+            const percent =
+                maxScore > 0
+                ? Math.round(
+                    score /
+                    maxScore *
                     100
-                );
+                )
+                : 0;
 
 
-            const bestanden =
-                prozent >=
+            const passed =
+                percent >=
                 Number(
-                    pruefung.bestehensgrenze
+                    exam.passPercent
                 );
 
 
-            const ergebnis = {
+            const result = {
 
-                id:
-                    neueID(
-                        "ergebnis"
-                    ),
+                id:id(),
 
-                pruefungId:
-                    pruefung.id,
+                examId:exam.id,
 
-                pruefungCode:
-                    pruefung.code,
+                examTitle:
+                    exam.title,
 
-                pruefungTitel:
-                    pruefung.titel,
+                examCode:
+                    exam.code,
 
-                vorname:
-                    String(
-                        vorname
-                    ),
+                firstName,
 
-                nachname:
-                    String(
-                        nachname
-                    ),
+                lastName,
 
-                feuerwehr:
-                    String(
-                        feuerwehr
-                    ),
+                fireDepartment,
 
-                punkte,
+                score,
 
-                maxPunkte,
+                maxScore,
 
-                prozent,
+                percent,
 
-                bestehensgrenze:
-                    pruefung.bestehensgrenze,
+                passPercent:
+                    exam.passPercent,
 
-                bestanden,
+                passed,
 
-                bewertung,
+                manualRequired,
 
-                createdAt:
-                    new Date()
-                        .toISOString()
+                questions:
+                    detailQuestions,
+
+                submittedAt:
+                    now()
 
             };
 
 
-            daten.ergebnisse.push(
-                ergebnis
+            db.ergebnisse.push(
+                result
             );
 
-
-            speichereDaten();
+            speichereDaten(db);
 
 
             res.json({
 
                 ok:true,
 
-                ergebnis
+                result:{
+
+                    id:result.id,
+
+                    score:result.score,
+
+                    maxScore:
+                        result.maxScore,
+
+                    percent:
+                        result.percent,
+
+                    passPercent:
+                        result.passPercent,
+
+                    passed:
+                        result.passed,
+
+                    manualRequired:
+                        result.manualRequired
+
+                }
 
             });
-
 
         }catch(error){
 
@@ -1544,122 +1888,238 @@ app.post(
                 error
             );
 
-
-            res
-                .status(500)
-                .json({
-                    error:
-                        "Prüfung konnte nicht gespeichert werden."
-                });
-
+            res.status(500).json({
+                error:
+                    "Die Prüfung konnte nicht gespeichert werden."
+            });
         }
-
     }
 );
 
 
-/* =========================================================
-   ADMIN ERGEBNISSE
-========================================================= */
+/* ============================================================
+   ÖFFENTLICHES ERGEBNIS
+============================================================ */
 
 app.get(
-    "/api/admin/ergebnisse",
-    adminErforderlich,
-    (req,res) => {
+    "/api/ergebnis/:id",
+    (req,res)=>{
 
-        const ergebnisse =
-            [
-                ...daten.ergebnisse
-            ]
-            .sort(
-                (a,b) =>
-                    new Date(
-                        b.createdAt
-                    ) -
-                    new Date(
-                        a.createdAt
-                    )
+        const result =
+            db.ergebnisse.find(
+                x=>x.id ===
+                    req.params.id
             );
+
+        if(!result){
+
+            return res.status(404).json({
+                error:
+                    "Ergebnis nicht gefunden."
+            });
+        }
 
 
         res.json({
 
-            ergebnisse
+            ergebnis:{
+
+                id:result.id,
+
+                examTitle:
+                    result.examTitle,
+
+                firstName:
+                    result.firstName,
+
+                lastName:
+                    result.lastName,
+
+                score:
+                    result.score,
+
+                maxScore:
+                    result.maxScore,
+
+                percent:
+                    result.percent,
+
+                passPercent:
+                    result.passPercent,
+
+                passed:
+                    result.passed,
+
+                manualRequired:
+                    result.manualRequired,
+
+                submittedAt:
+                    result.submittedAt
+
+            }
 
         });
-
     }
 );
 
 
-/* =========================================================
-   404
-========================================================= */
+/* ============================================================
+   ADMIN ERGEBNISSE
+============================================================ */
+
+app.get(
+    "/api/admin/ergebnisse",
+    requireAdmin,
+    (req,res)=>{
+
+        const ergebnisse =
+            db.ergebnisse
+            .slice()
+            .reverse()
+            .map(result=>({
+
+                id:result.id,
+
+                examId:
+                    result.examId,
+
+                examTitle:
+                    result.examTitle,
+
+                firstName:
+                    result.firstName,
+
+                lastName:
+                    result.lastName,
+
+                fireDepartment:
+                    result.fireDepartment,
+
+                score:
+                    result.score,
+
+                maxScore:
+                    result.maxScore,
+
+                percent:
+                    result.percent,
+
+                passPercent:
+                    result.passPercent,
+
+                passed:
+                    result.passed,
+
+                manualRequired:
+                    result.manualRequired,
+
+                submittedAt:
+                    result.submittedAt
+
+            }));
+
+
+        res.json({
+            ergebnisse
+        });
+    }
+);
+
+
+/* ============================================================
+   ADMIN ERGEBNIS DETAIL
+============================================================ */
+
+app.get(
+    "/api/admin/ergebnisse/:id",
+    requireAdmin,
+    (req,res)=>{
+
+        const result =
+            db.ergebnisse.find(
+                x=>x.id ===
+                    req.params.id
+            );
+
+        if(!result){
+
+            return res.status(404).json({
+                error:
+                    "Ergebnis nicht gefunden."
+            });
+        }
+
+        res.json({
+            ergebnis:result
+        });
+    }
+);
+
+
+/* ============================================================
+   FEHLERBEHANDLUNG
+============================================================ */
 
 app.use(
-    (req,res) => {
+    (req,res)=>{
 
-        res
-            .status(404)
-            .json({
-                error:
-                    "API-Endpunkt nicht gefunden."
-            });
-
+        res.status(404).json({
+            error:
+                "API-Endpunkt nicht gefunden."
+        });
     }
 );
 
 
-/* =========================================================
-   SERVER
-========================================================= */
+app.use(
+    (error,req,res,next)=>{
+
+        console.error(error);
+
+        res.status(500).json({
+            error:
+                "Interner Serverfehler."
+        });
+    }
+);
+
+
+/* ============================================================
+   SERVER START
+============================================================ */
 
 app.listen(
     PORT,
-    () => {
-
+    "0.0.0.0",
+    ()=>{
+        console.log("");
         console.log(
-            "========================================"
+            "=============================================="
         );
-
         console.log(
-            "🚒 FEUERWEHR PRÜFUNGSPLATTFORM"
+            " FEUERWEHR PRÜFUNGSPLATTFORM"
         );
-
         console.log(
-            "========================================"
+            "=============================================="
         );
-
         console.log(
-            "Server:",
-            `http://localhost:${PORT}`
+            "Server: http://localhost:" +
+            PORT
         );
-
         console.log(
-            "KI:",
-            openai
-            ? "AKTIV"
-            : "NICHT KONFIGURIERT"
+            "KI: Feuerwehr-Ausbilder-KI"
         );
-
         console.log(
-            "KI-Modell:",
-            OPENAI_MODEL
+            "Datenbank: " +
+            DB_FILE
         );
-
         console.log(
-            "Ausbilder:",
+            "Admin: " +
             ADMIN_EMAIL
         );
-
         console.log(
-            "Daten:",
-            DATA_FILE
+            "=============================================="
         );
-
-        console.log(
-            "========================================"
-        );
-
+        console.log("");
     }
 );
