@@ -7,263 +7,560 @@
 <title>Feuerwehr Prüfungsplattform</title>
 
 <style>
-* {
-    box-sizing: border-box;
+:root{
+    --red:#c8102e;
+    --red2:#ff334f;
+    --dark:#0b0d10;
+    --dark2:#11151a;
+    --card:#171c22;
+    --card2:#1d232b;
+    --border:#2b333d;
+    --text:#f5f7fa;
+    --muted:#aab2bd;
+    --green:#25c281;
+    --yellow:#f4c542;
+    --blue:#3d8bfd;
 }
 
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    font-family:Arial,Helvetica,sans-serif;
     background:
-        radial-gradient(circle at top, #4a0808, #130606 45%, #050505);
-    color: white;
-    min-height: 100vh;
+        radial-gradient(circle at top right,#2a0b10 0,#0b0d10 38%),
+        #0b0d10;
+    color:var(--text);
 }
 
 button,
 input,
 textarea,
-select {
-    font: inherit;
+select{
+    font:inherit;
 }
 
-button {
-    cursor: pointer;
+button{
+    cursor:pointer;
 }
 
-header {
-    padding: 18px 30px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: rgba(0,0,0,.65);
-    border-bottom: 1px solid rgba(255,255,255,.1);
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    backdrop-filter: blur(15px);
+.hidden{
+    display:none!important;
 }
 
-.logo {
-    width: 55px;
-    height: 55px;
-    display: grid;
-    place-items: center;
-    border-radius: 16px;
-    background: linear-gradient(135deg,#ff3b30,#970000);
-    font-size: 30px;
+/* HEADER */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    background:rgba(11,13,16,.94);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--border);
 }
 
-header h1 {
-    margin: 0;
-    font-size: 22px;
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+    font-size:20px;
 }
 
-header p {
-    margin: 4px 0 0;
-    color: #aaa;
+.logoIcon{
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    border-radius:12px;
+    background:linear-gradient(135deg,var(--red),#790016);
+    box-shadow:0 8px 25px rgba(200,16,46,.3);
 }
 
-.container {
-    width: min(1100px,calc(100% - 30px));
-    margin: 35px auto;
+.headerRight{
+    display:flex;
+    gap:10px;
 }
 
-.card {
-    background: rgba(255,255,255,.055);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 25px;
-    padding: 30px;
-    box-shadow: 0 25px 70px rgba(0,0,0,.3);
-    margin-bottom: 20px;
+/* LAYOUT */
+
+.container{
+    width:min(1200px,calc(100% - 30px));
+    margin:0 auto;
 }
 
-.hero {
-    text-align: center;
-    padding: 60px 25px;
+.page{
+    min-height:calc(100vh - 72px);
+    padding:35px 0 70px;
 }
 
-.hero .big {
-    font-size: 75px;
+.hero{
+    text-align:center;
+    padding:55px 15px 35px;
 }
 
-.hero h2 {
-    font-size: 40px;
-    margin: 15px 0;
+.heroBadge{
+    display:inline-flex;
+    padding:8px 14px;
+    border-radius:999px;
+    background:rgba(200,16,46,.12);
+    border:1px solid rgba(200,16,46,.4);
+    color:#ff6a7e;
+    font-weight:700;
+    margin-bottom:20px;
 }
 
-.hero p {
-    color: #bbb;
-    max-width: 700px;
-    margin: auto;
-    line-height: 1.7;
+.hero h1{
+    font-size:clamp(36px,6vw,68px);
+    margin:0;
+    line-height:1;
 }
 
-.buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 30px;
+.hero p{
+    max-width:700px;
+    margin:22px auto;
+    color:var(--muted);
+    font-size:18px;
+    line-height:1.6;
 }
 
-.btn {
-    border: 0;
-    border-radius: 13px;
-    padding: 14px 22px;
-    color: white;
-    background: linear-gradient(135deg,#ff3838,#a50000);
-    font-weight: bold;
-    transition: .2s;
+/* CARDS */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
+.card{
+    background:linear-gradient(180deg,var(--card2),var(--card));
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 15px 40px rgba(0,0,0,.2);
 }
 
-.btn.secondary {
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.15);
+.card h2,
+.card h3{
+    margin-top:0;
 }
 
-.btn.green {
-    background: linear-gradient(135deg,#20c76b,#087d3b);
+.card p{
+    color:var(--muted);
+    line-height:1.6;
 }
 
-.btn.danger {
-    background: linear-gradient(135deg,#ff4c4c,#850000);
+/* BUTTONS */
+
+.btn{
+    border:0;
+    border-radius:12px;
+    padding:13px 18px;
+    color:white;
+    background:#2a313a;
+    transition:.18s;
+    font-weight:700;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.1);
+}
+
+.btnRed{
+    background:linear-gradient(135deg,var(--red2),var(--red));
+}
+
+.btnGreen{
+    background:#158b5d;
+}
+
+.btnBlue{
+    background:#236bd0;
+}
+
+.btnYellow{
+    background:#a77d08;
+}
+
+.btnDanger{
+    background:#8d1429;
+}
+
+.btnGhost{
+    background:transparent;
+    border:1px solid var(--border);
+}
+
+/* FORM */
+
+.formGrid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:15px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.field.full{
+    grid-column:1/-1;
+}
+
+.field label{
+    color:#d9dee5;
+    font-weight:700;
 }
 
 input,
 textarea,
-select {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(0,0,0,.45);
-    color: white;
-    outline: none;
-    margin-top: 7px;
+select{
+    width:100%;
+    background:#0e1217;
+    color:white;
+    border:1px solid var(--border);
+    border-radius:11px;
+    padding:13px;
+    outline:none;
 }
 
-textarea {
-    min-height: 220px;
-    resize: vertical;
+input:focus,
+textarea:focus,
+select:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 3px rgba(200,16,46,.1);
 }
 
-label {
-    display: block;
-    margin-top: 15px;
-    color: #ddd;
-    font-weight: bold;
+textarea{
+    min-height:180px;
+    resize:vertical;
 }
 
-.hidden {
-    display: none !important;
+/* ACTIONS */
+
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 15px;
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:20px;
 }
 
-.question {
-    padding: 22px;
-    border-radius: 18px;
-    background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.08);
-    margin-bottom: 15px;
+.stat{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:18px;
+    border-radius:15px;
 }
 
-.option {
-    display: block;
-    padding: 13px;
-    margin-top: 8px;
-    border-radius: 10px;
-    background: rgba(255,255,255,.05);
-    cursor: pointer;
+.statValue{
+    font-size:30px;
+    font-weight:900;
 }
 
-.option:hover {
-    background: rgba(255,255,255,.1);
+.statLabel{
+    color:var(--muted);
+    margin-top:5px;
 }
 
-.result {
-    text-align: center;
+/* ADMIN */
+
+.adminLayout{
+    display:grid;
+    grid-template-columns:230px 1fr;
+    gap:18px;
 }
 
-.score {
-    font-size: 55px;
-    font-weight: bold;
+.sidebar{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:12px;
+    height:max-content;
+    position:sticky;
+    top:90px;
 }
 
-.good {
-    color: #36d77a;
+.sideBtn{
+    width:100%;
+    text-align:left;
+    margin-bottom:7px;
+    border:0;
+    padding:13px;
+    border-radius:10px;
+    background:transparent;
+    color:#cfd5dc;
 }
 
-.bad {
-    color: #ff4d4d;
+.sideBtn:hover,
+.sideBtn.active{
+    background:rgba(200,16,46,.15);
+    color:white;
 }
 
-.status {
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 15px;
-    background: rgba(255,255,255,.06);
+.adminContent{
+    min-width:0;
 }
 
-.admin-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+/* TABLE */
+
+.tableWrap{
+    overflow:auto;
+    border:1px solid var(--border);
+    border-radius:14px;
 }
 
-.exam-card {
-    margin-top: 15px;
-    padding: 20px;
-    border-radius: 17px;
-    background: rgba(0,0,0,.25);
-    border: 1px solid rgba(255,255,255,.08);
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
 }
 
-.small {
-    color: #999;
-    font-size: 13px;
+th,
+td{
+    padding:13px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
 }
 
-.timer {
-    position: sticky;
-    top: 90px;
-    z-index: 10;
-    text-align: center;
-    padding: 15px;
-    border-radius: 15px;
-    background: #9d0000;
-    font-weight: bold;
-    margin-bottom: 20px;
+th{
+    color:#cfd5dc;
+    background:#12161b;
 }
 
-footer {
-    text-align: center;
-    color: #777;
-    padding: 30px;
+td{
+    color:#e9edf2;
 }
 
-@media(max-width:700px) {
-    .grid {
-        grid-template-columns: 1fr;
+/* QUESTION */
+
+.question{
+    margin-bottom:20px;
+}
+
+.questionTitle{
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:13px;
+}
+
+.option{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:13px;
+    margin:8px 0;
+    background:#10151a;
+    border:1px solid var(--border);
+    border-radius:11px;
+    cursor:pointer;
+}
+
+.option:hover{
+    border-color:#4b5663;
+}
+
+.option input{
+    width:auto;
+    margin-top:3px;
+}
+
+/* TIMER */
+
+.examTop{
+    position:sticky;
+    top:72px;
+    z-index:50;
+    background:rgba(11,13,16,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:13px 0;
+}
+
+.examTopInner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.timer{
+    padding:10px 15px;
+    background:#40121b;
+    border:1px solid #78202f;
+    color:#ff7387;
+    border-radius:10px;
+    font-weight:900;
+    font-size:20px;
+}
+
+/* BADGES */
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    background:#252c35;
+}
+
+.badge.green{
+    background:rgba(37,194,129,.13);
+    color:#50e3a3;
+}
+
+.badge.red{
+    background:rgba(200,16,46,.15);
+    color:#ff7084;
+}
+
+.badge.yellow{
+    background:rgba(244,197,66,.15);
+    color:#ffd967;
+}
+
+/* RESULT */
+
+.resultCircle{
+    width:150px;
+    height:150px;
+    margin:10px auto 25px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    border:8px solid var(--red);
+    font-size:34px;
+    font-weight:900;
+}
+
+.resultCenter{
+    text-align:center;
+}
+
+.notice{
+    padding:14px;
+    border-radius:11px;
+    margin:15px 0;
+    background:#141a20;
+    border:1px solid var(--border);
+}
+
+.notice.error{
+    border-color:#7f1e2f;
+    background:#281118;
+}
+
+.notice.success{
+    border-color:#176e4d;
+    background:#10241c;
+}
+
+/* AI */
+
+.aiBox{
+    border:1px solid #7d2637;
+    background:
+        radial-gradient(circle at top right,rgba(200,16,46,.18),transparent 45%),
+        #171419;
+}
+
+.aiTitle{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:900;
+    font-size:21px;
+}
+
+.aiPulse{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#ff405a;
+    box-shadow:0 0 15px #ff405a;
+}
+
+/* FOOTER */
+
+.footer{
+    padding:30px 0;
+    text-align:center;
+    color:#707984;
+    border-top:1px solid var(--border);
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+    .adminLayout{
+        grid-template-columns:1fr;
     }
 
-    .hero h2 {
-        font-size: 30px;
+    .sidebar{
+        position:static;
     }
 
-    header {
-        padding: 15px;
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .formGrid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+    .header{
+        padding:0 15px;
+    }
+
+    .logo span{
+        display:none;
+    }
+}
+
+@media(max-width:500px){
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding-top:30px;
+    }
+
+    .hero h1{
+        font-size:40px;
+    }
+
+    .page{
+        padding-top:20px;
     }
 }
 </style>
@@ -271,290 +568,584 @@ footer {
 
 <body>
 
-<header>
-    <div class="logo">🚒</div>
+<header class="header">
+    <div class="logo">
+        <div class="logoIcon">🚒</div>
+        <span>Feuerwehr Prüfungsplattform</span>
+    </div>
 
-    <div>
-        <h1>Feuerwehr Prüfungsplattform</h1>
-        <p>Ausbildung • Prüfung • Auswertung</p>
+    <div class="headerRight">
+        <button class="btn btnGhost" onclick="zeigeStart()">Start</button>
+        <button class="btn btnGhost" onclick="zeigeAdminLogin()">Ausbilder</button>
     </div>
 </header>
 
-<main class="container">
 
 <!-- START -->
-<section id="start" class="card hero">
 
-    <div class="big">🚒</div>
+<section id="seiteStart" class="page">
+<div class="container">
 
-    <h2>Feuerwehr Prüfungsplattform</h2>
+    <div class="hero">
+        <div class="heroBadge">🚒 Digitale Feuerwehr-Ausbildung</div>
 
-    <p>
-        Digitale Prüfungen für die Feuerwehr.
-        Ausbilder können Prüfungen erstellen und Teilnehmer
-        können diese über einen Prüfungscode durchführen.
-    </p>
+        <h1>Feuerwehr<br>Prüfungsplattform</h1>
 
-    <div class="buttons">
+        <p>
+            Prüfungen erstellen, Teilnehmer prüfen und Ergebnisse auswerten –
+            alles zentral in einer modernen Plattform mit integrierter KI.
+        </p>
 
-        <button class="btn" onclick="zeigeTeilnehmer()">
-            📝 Prüfung starten
-        </button>
+        <div class="actions" style="justify-content:center">
+            <button class="btn btnRed" onclick="zeigeTeilnehmerStart()">
+                📝 Prüfung starten
+            </button>
 
-        <button class="btn secondary" onclick="zeigeAdminLogin()">
-            🔐 Ausbilder / Admin
-        </button>
+            <button class="btn btnGhost" onclick="zeigeAdminLogin()">
+                🔐 Ausbilderbereich
+            </button>
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>🤖 Feuerwehr-KI</h3>
+            <p>
+                Deine Schulungsunterlagen werden von der KI analysiert
+                und daraus werden automatisch passende Prüfungsfragen erstellt.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>📝 Digitale Prüfung</h3>
+            <p>
+                Teilnehmer bearbeiten Multiple-Choice-, Richtig/Falsch-
+                und Freitextfragen direkt auf der Website.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Auswertung</h3>
+            <p>
+                Punkte, Prozentwerte und bestanden/nicht bestanden
+                werden automatisch berechnet.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>💾 Speicherung</h3>
+            <p>
+                Prüfungen und Ergebnisse werden dauerhaft auf dem
+                Backend gespeichert.
+            </p>
+        </div>
 
     </div>
 
+</div>
 </section>
 
 
 <!-- TEILNEHMER START -->
-<section id="teilnehmerStart" class="card hidden">
 
-    <h2>📝 Prüfung starten</h2>
+<section id="seiteTeilnehmer" class="page hidden">
+<div class="container">
 
-    <label>Prüfungscode</label>
-    <input id="teilnehmerCode" placeholder="z.B. FW2026">
+    <div class="card" style="max-width:700px;margin:auto">
 
-    <label>Vorname</label>
-    <input id="teilnehmerVorname" placeholder="Vorname">
+        <h1>👨‍🚒 Prüfung starten</h1>
 
-    <label>Nachname</label>
-    <input id="teilnehmerNachname" placeholder="Nachname">
+        <p>
+            Gib deine persönlichen Daten und den Prüfungscode ein.
+        </p>
 
-    <label>Feuerwehr</label>
-    <input id="teilnehmerFeuerwehr" placeholder="Feuerwehr / Löschgruppe">
+        <div id="teilnehmerFehler"></div>
 
-    <div class="buttons">
+        <div class="formGrid">
 
-        <button class="btn" onclick="startePruefung()">
-            Prüfung öffnen
-        </button>
+            <div class="field">
+                <label>Vorname</label>
+                <input id="teilnehmerVorname" placeholder="Max">
+            </div>
 
-        <button class="btn secondary" onclick="zurStartseite()">
-            Zurück
-        </button>
+            <div class="field">
+                <label>Nachname</label>
+                <input id="teilnehmerNachname" placeholder="Mustermann">
+            </div>
+
+            <div class="field full">
+                <label>Feuerwehr</label>
+                <input id="teilnehmerFeuerwehr"
+                       placeholder="Freiwillige Feuerwehr Musterstadt">
+            </div>
+
+            <div class="field full">
+                <label>Prüfungscode</label>
+                <input id="teilnehmerCode"
+                       placeholder="z.B. TM1-2026"
+                       style="text-transform:uppercase">
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button class="btn btnRed" onclick="startePruefung()">
+                Prüfung laden
+            </button>
+
+            <button class="btn btnGhost" onclick="zeigeStart()">
+                Zurück
+            </button>
+        </div>
 
     </div>
 
-    <div id="teilnehmerFehler" class="status hidden"></div>
-
+</div>
 </section>
 
 
 <!-- PRÜFUNG -->
-<section id="pruefung" class="hidden">
 
-    <div class="card">
+<section id="seitePruefung" class="hidden">
 
-        <div class="timer">
-            ⏱️ <span id="timer">--:--</span>
+    <div class="examTop">
+        <div class="container examTopInner">
+
+            <div>
+                <strong id="pruefungTitelTop">Prüfung</strong>
+                <div id="pruefungTeilnehmerTop"
+                     style="font-size:13px;color:var(--muted)">
+                </div>
+            </div>
+
+            <div class="timer" id="timer">
+                00:00
+            </div>
+
+        </div>
+    </div>
+
+    <div class="page">
+    <div class="container">
+
+        <div class="card">
+
+            <h1 id="pruefungTitel">Prüfung</h1>
+
+            <p id="pruefungBeschreibung"></p>
+
+            <div id="fragenContainer"></div>
+
+            <div class="actions">
+                <button class="btn btnRed"
+                        onclick="pruefungAbgeben()">
+                    📨 Prüfung abgeben
+                </button>
+            </div>
+
         </div>
 
-        <h2 id="pruefungTitel">Prüfung</h2>
-
-        <p id="pruefungInfo"></p>
-
-        <div id="fragen"></div>
-
-        <button class="btn green" onclick="pruefungAbgeben()">
-            ✅ Prüfung abgeben
-        </button>
-
+    </div>
     </div>
 
 </section>
 
 
 <!-- ERGEBNIS -->
-<section id="ergebnis" class="card result hidden">
 
-    <div class="big">📊</div>
+<section id="seiteErgebnis" class="page hidden">
+<div class="container">
 
-    <h2>Prüfung abgeschlossen</h2>
+    <div class="card resultCenter"
+         style="max-width:700px;margin:auto">
 
-    <div id="ergebnisText"></div>
+        <div id="resultCircle"
+             class="resultCircle">
+            0%
+        </div>
 
-    <button class="btn secondary" onclick="zurStartseite()">
-        Zur Startseite
-    </button>
+        <h1 id="ergebnisTitel">
+            Ergebnis
+        </h1>
 
+        <p id="ergebnisText"></p>
+
+        <div id="ergebnisDetails"></div>
+
+        <div class="actions"
+             style="justify-content:center">
+
+            <button class="btn btnRed"
+                    onclick="zeigeStart()">
+                Zur Startseite
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 </section>
 
 
 <!-- ADMIN LOGIN -->
-<section id="adminLogin" class="card hidden">
 
-    <h2>🔐 Admin-Bereich</h2>
+<section id="seiteAdminLogin" class="page hidden">
+<div class="container">
 
-    <p class="small">
-        Nur für Ausbilder und Administratoren.
-    </p>
+    <div class="card"
+         style="max-width:500px;margin:70px auto">
 
-    <label>E-Mail</label>
-    <input id="adminEmail" type="email">
+        <h1>🔐 Ausbilderbereich</h1>
 
-    <label>Passwort</label>
-    <input id="adminPassword" type="password">
+        <p>
+            Melde dich mit deinem Ausbilderkonto an.
+        </p>
 
-    <div class="buttons">
+        <div id="loginFehler"></div>
 
-        <button class="btn" onclick="adminLogin()">
-            Anmelden
-        </button>
+        <div class="field">
+            <label>E-Mail</label>
+            <input id="adminEmail"
+                   type="email"
+                   placeholder="Ausbilder@beispiel.de">
+        </div>
 
-        <button class="btn secondary" onclick="zurStartseite()">
-            Zurück
-        </button>
+        <br>
+
+        <div class="field">
+            <label>Passwort</label>
+            <input id="adminPassword"
+                   type="password"
+                   placeholder="Passwort">
+        </div>
+
+        <div class="actions">
+            <button class="btn btnRed"
+                    onclick="adminLogin()">
+                Anmelden
+            </button>
+
+            <button class="btn btnGhost"
+                    onclick="zeigeStart()">
+                Zurück
+            </button>
+        </div>
 
     </div>
 
-    <div id="loginFehler" class="status hidden"></div>
-
+</div>
 </section>
 
 
 <!-- ADMIN -->
-<section id="admin" class="hidden">
 
-    <div class="card">
+<section id="seiteAdmin" class="page hidden">
+<div class="container">
 
-        <div class="admin-top">
+    <div class="adminLayout">
 
-            <div>
-                <h2>🚒 Ausbilder-Bereich</h2>
-                <p class="small">
-                    Prüfungen erstellen und Ergebnisse verwalten
-                </p>
-            </div>
+        <aside class="sidebar">
 
-            <button class="btn secondary" onclick="adminLogout()">
-                Abmelden
+            <button class="sideBtn active"
+                    onclick="adminSeite('dashboard',this)">
+                📊 Dashboard
             </button>
 
-        </div>
-
-    </div>
-
-
-    <!-- ERSTELLEN -->
-    <div class="card">
-
-        <h2>🤖 Neue Prüfung erstellen</h2>
-
-        <label>Titel</label>
-        <input id="examTitle"
-               placeholder="z.B. Truppmann 1 – Grundlagen">
-
-        <label>Thema</label>
-        <input id="examTopic"
-               placeholder="z.B. Brandbekämpfung">
-
-        <label>Unterrichtsmaterial</label>
-
-        <textarea
-            id="examMaterial"
-            placeholder="Füge hier deinen Ausbildungsstoff ein..."></textarea>
-
-        <div class="grid">
-
-            <div>
-                <label>Fragen</label>
-
-                <input
-                    id="examQuestions"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value="10">
-            </div>
-
-            <div>
-
-                <label>Schwierigkeit</label>
-
-                <select id="examDifficulty">
-
-                    <option value="leicht">
-                        Leicht
-                    </option>
-
-                    <option value="mittel" selected>
-                        Mittel
-                    </option>
-
-                    <option value="schwer">
-                        Schwer
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div>
-
-                <label>Bestehen ab %</label>
-
-                <input
-                    id="examPass"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value="50">
-
-            </div>
-
-            <div>
-
-                <label>Zeit in Minuten</label>
-
-                <input
-                    id="examTime"
-                    type="number"
-                    min="1"
-                    max="300"
-                    value="30">
-
-            </div>
-
-        </div>
-
-        <div class="buttons">
-
-            <button
-                class="btn"
-                onclick="erstellePruefung()">
-
-                🤖 Prüfung mit KI erstellen
-
+            <button class="sideBtn"
+                    onclick="adminSeite('ki',this)">
+                🤖 KI-Prüfung
             </button>
 
-        </div>
+            <button class="sideBtn"
+                    onclick="adminSeite('pruefungen',this)">
+                📝 Prüfungen
+            </button>
 
-        <div id="kiStatus" class="status hidden"></div>
+            <button class="sideBtn"
+                    onclick="adminSeite('ergebnisse',this)">
+                📈 Ergebnisse
+            </button>
+
+            <button class="sideBtn"
+                    onclick="adminLogout()">
+                🚪 Abmelden
+            </button>
+
+        </aside>
+
+
+        <main class="adminContent">
+
+
+            <!-- DASHBOARD -->
+
+            <div id="adminDashboard">
+
+                <h1>Dashboard</h1>
+
+                <div class="stats">
+
+                    <div class="stat">
+                        <div class="statValue"
+                             id="statPruefungen">
+                            0
+                        </div>
+
+                        <div class="statLabel">
+                            Prüfungen
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="statValue"
+                             id="statErgebnisse">
+                            0
+                        </div>
+
+                        <div class="statLabel">
+                            Ergebnisse
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="statValue"
+                             id="statBestanden">
+                            0
+                        </div>
+
+                        <div class="statLabel">
+                            Bestanden
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="statValue"
+                             id="statQuote">
+                            0%
+                        </div>
+
+                        <div class="statLabel">
+                            Bestehensquote
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h2>Schnellstart</h2>
+
+                    <p>
+                        Erstelle eine neue Prüfung mit der
+                        Feuerwehr-KI oder öffne deine vorhandenen Prüfungen.
+                    </p>
+
+                    <div class="actions">
+
+                        <button class="btn btnRed"
+                                onclick="adminSeite('ki')">
+                            🤖 Prüfung mit KI erstellen
+                        </button>
+
+                        <button class="btn"
+                                onclick="adminSeite('pruefungen')">
+                            📝 Prüfungen anzeigen
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- KI -->
+
+            <div id="adminKI" class="hidden">
+
+                <div class="card aiBox">
+
+                    <div class="aiTitle">
+                        <span class="aiPulse"></span>
+                        Feuerwehr-KI
+                    </div>
+
+                    <p>
+                        Füge hier deinen Ausbildungsstoff ein.
+                        Die KI verwendet diesen Text als Grundlage
+                        für die Prüfung.
+                    </p>
+
+                    <div id="kiMeldung"></div>
+
+                    <div class="formGrid">
+
+                        <div class="field full">
+                            <label>
+                                Ausbildungsstoff
+                            </label>
+
+                            <textarea
+                                id="kiMaterial"
+                                placeholder="Beispiel:
+
+Atemschutzgeräteträger müssen vor dem Einsatz ihre persönliche Schutzausrüstung kontrollieren.
+Der Truppführer ist für die Führung des Trupps verantwortlich.
+Bei einem Innenangriff ist auf die Kommunikation und Atemschutzüberwachung zu achten."></textarea>
+                        </div>
+
+                        <div class="field">
+                            <label>Prüfungstitel</label>
+                            <input id="kiTitel"
+                                   value="Feuerwehr Prüfung">
+                        </div>
+
+                        <div class="field">
+                            <label>Fragenanzahl</label>
+
+                            <select id="kiFragen">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>Schwierigkeit</label>
+
+                            <select id="kiSchwierigkeit">
+                                <option value="leicht">
+                                    Leicht
+                                </option>
+
+                                <option value="mittel"
+                                        selected>
+                                    Mittel
+                                </option>
+
+                                <option value="schwer">
+                                    Schwer
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>Prüfungszeit</label>
+
+                            <select id="kiZeit">
+                                <option value="15">15 Minuten</option>
+                                <option value="30" selected>
+                                    30 Minuten
+                                </option>
+                                <option value="45">45 Minuten</option>
+                                <option value="60">60 Minuten</option>
+                                <option value="90">90 Minuten</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>Bestehensgrenze</label>
+
+                            <select id="kiBestehen">
+                                <option value="50">50%</option>
+                                <option value="60">60%</option>
+                                <option value="70" selected>
+                                    70%
+                                </option>
+                                <option value="75">75%</option>
+                                <option value="80">80%</option>
+                                <option value="90">90%</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button class="btn btnRed"
+                                id="kiButton"
+                                onclick="kiPruefungErstellen()">
+                            🤖 Prüfung mit KI erstellen
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PRÜFUNGEN -->
+
+            <div id="adminPruefungen" class="hidden">
+
+                <div class="card">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        gap:15px;
+                        flex-wrap:wrap;
+                    ">
+
+                        <div>
+                            <h1>📝 Prüfungen</h1>
+                            <p>
+                                Deine gespeicherten Prüfungen.
+                            </p>
+                        </div>
+
+                        <button class="btn btnRed"
+                                onclick="adminSeite('ki')">
+                            + Neue Prüfung
+                        </button>
+
+                    </div>
+
+                    <div id="pruefungenListe">
+                        Wird geladen...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ERGEBNISSE -->
+
+            <div id="adminErgebnisse" class="hidden">
+
+                <div class="card">
+
+                    <h1>📈 Ergebnisse</h1>
+
+                    <p>
+                        Eingereichte Prüfungen und Ergebnisse.
+                    </p>
+
+                    <div id="ergebnisseListe">
+                        Wird geladen...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
 
     </div>
 
-
-    <!-- PRÜFUNGEN -->
-    <div class="card">
-
-        <h2>📚 Gespeicherte Prüfungen</h2>
-
-        <div id="pruefungsListe">
-            Lade Prüfungen...
-        </div>
-
-    </div>
-
+</div>
 </section>
 
-</main>
 
-<footer>
-    Feuerwehr Prüfungsplattform
+<footer class="footer">
+    Feuerwehr Prüfungsplattform · Digitale Ausbildung
 </footer>
 
 
@@ -562,97 +1153,150 @@ footer {
 
 /* =========================================================
    KONFIGURATION
-========================================================= */
+   ========================================================= */
 
 const API_URL =
     localStorage.getItem("FEUERWEHR_API") ||
     "http://localhost:3000";
 
-const ADMIN_EMAIL = "Ausbilder@gmail.com";
-const ADMIN_PASSWORD = "Admin";
-
 
 /* =========================================================
-   DATEN
-========================================================= */
+   GLOBALER ZUSTAND
+   ========================================================= */
 
 let aktuellePruefung = null;
-let teilnehmer = null;
+let aktuellerTeilnehmer = null;
 let timerInterval = null;
-let restSekunden = 0;
+let verbleibendeSekunden = 0;
 
 
 /* =========================================================
-   HILFSFUNKTIONEN
-========================================================= */
+   SEITEN
+   ========================================================= */
 
-function alleBereicheVerstecken() {
+const seiten = [
+    "seiteStart",
+    "seiteTeilnehmer",
+    "seitePruefung",
+    "seiteErgebnis",
+    "seiteAdminLogin",
+    "seiteAdmin"
+];
 
-    [
-        "start",
-        "teilnehmerStart",
-        "pruefung",
-        "ergebnis",
-        "adminLogin",
-        "admin"
-    ].forEach(id => {
 
-        document.getElementById(id)
-            .classList.add("hidden");
+function versteckeAlleSeiten(){
+
+    seiten.forEach(id => {
+
+        const el = document.getElementById(id);
+
+        if(el){
+            el.classList.add("hidden");
+        }
 
     });
 
 }
 
 
-function zurStartseite() {
+function zeigeStart(){
 
-    clearInterval(timerInterval);
+    stoppeTimer();
 
-    alleBereicheVerstecken();
+    versteckeAlleSeiten();
 
-    document.getElementById("start")
+    document
+        .getElementById("seiteStart")
         .classList.remove("hidden");
-
 }
 
 
-function zeigeTeilnehmer() {
+function zeigeTeilnehmerStart(){
 
-    alleBereicheVerstecken();
+    versteckeAlleSeiten();
 
-    document.getElementById("teilnehmerStart")
+    document
+        .getElementById("seiteTeilnehmer")
         .classList.remove("hidden");
-
 }
 
 
-function zeigeAdminLogin() {
+function zeigeAdminLogin(){
 
-    alleBereicheVerstecken();
+    versteckeAlleSeiten();
 
-    document.getElementById("adminLogin")
+    document
+        .getElementById("seiteAdminLogin")
         .classList.remove("hidden");
-
-}
-
-
-function zeigeFehler(id,text) {
-
-    const el = document.getElementById(id);
-
-    el.textContent = text;
-
-    el.classList.remove("hidden");
-
 }
 
 
 /* =========================================================
-   ADMIN LOGIN
-========================================================= */
+   ADMIN
+   ========================================================= */
 
-function adminLogin() {
+function adminSeite(name,button){
+
+    document
+        .getElementById("adminDashboard")
+        .classList.add("hidden");
+
+    document
+        .getElementById("adminKI")
+        .classList.add("hidden");
+
+    document
+        .getElementById("adminPruefungen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("adminErgebnisse")
+        .classList.add("hidden");
+
+
+    const map = {
+
+        dashboard:"adminDashboard",
+        ki:"adminKI",
+        pruefungen:"adminPruefungen",
+        ergebnisse:"adminErgebnisse"
+
+    };
+
+
+    const ziel = document.getElementById(map[name]);
+
+    if(ziel){
+        ziel.classList.remove("hidden");
+    }
+
+
+    document
+        .querySelectorAll(".sideBtn")
+        .forEach(btn => btn.classList.remove("active"));
+
+
+    if(button){
+        button.classList.add("active");
+    }
+
+
+    if(name === "dashboard"){
+        ladeDashboard();
+    }
+
+    if(name === "pruefungen"){
+        ladePruefungen();
+    }
+
+    if(name === "ergebnisse"){
+        ladeErgebnisse();
+    }
+
+}
+
+
+async function adminLogin(){
 
     const email =
         document.getElementById("adminEmail").value.trim();
@@ -660,126 +1304,339 @@ function adminLogin() {
     const password =
         document.getElementById("adminPassword").value;
 
-    if (
-        email.toLowerCase() !== ADMIN_EMAIL.toLowerCase() ||
-        password !== ADMIN_PASSWORD
-    ) {
 
-        zeigeFehler(
-            "loginFehler",
-            "❌ E-Mail oder Passwort ist falsch."
-        );
+    const fehler =
+        document.getElementById("loginFehler");
+
+
+    fehler.innerHTML = "";
+
+
+    if(!email || !password){
+
+        fehler.innerHTML =
+            '<div class="notice error">Bitte E-Mail und Passwort eingeben.</div>';
 
         return;
     }
 
-    localStorage.setItem("FW_ADMIN","true");
 
-    document.getElementById("adminEmail").value = "";
-    document.getElementById("adminPassword").value = "";
+    try{
 
-    zeigeAdmin();
+        const response = await fetch(
+            API_URL + "/api/admin/login",
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    email,
+                    password
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.error || "Anmeldung fehlgeschlagen."
+            );
+
+        }
+
+
+        localStorage.setItem(
+            "FW_ADMIN_TOKEN",
+            data.token
+        );
+
+
+        versteckeAlleSeiten();
+
+        document
+            .getElementById("seiteAdmin")
+            .classList.remove("hidden");
+
+
+        adminSeite("dashboard");
+
+
+    }catch(error){
+
+        fehler.innerHTML =
+            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+
+    }
 
 }
 
 
-function zeigeAdmin() {
+function adminLogout(){
 
-    alleBereicheVerstecken();
+    localStorage.removeItem("FW_ADMIN_TOKEN");
 
-    document.getElementById("admin")
-        .classList.remove("hidden");
-
-    ladePruefungen();
+    zeigeStart();
 
 }
 
 
-function adminLogout() {
+function adminToken(){
 
-    localStorage.removeItem("FW_ADMIN");
+    return localStorage.getItem("FW_ADMIN_TOKEN") || "";
+}
 
-    zurStartseite();
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+async function ladeDashboard(){
+
+    try{
+
+        const data =
+            await api("/api/admin/dashboard");
+
+
+        document.getElementById("statPruefungen")
+            .textContent = data.pruefungen;
+
+        document.getElementById("statErgebnisse")
+            .textContent = data.ergebnisse;
+
+        document.getElementById("statBestanden")
+            .textContent = data.bestanden;
+
+        document.getElementById("statQuote")
+            .textContent = data.quote + "%";
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+/* =========================================================
+   KI PRÜFUNG
+   ========================================================= */
+
+async function kiPruefungErstellen(){
+
+    const material =
+        document.getElementById("kiMaterial").value.trim();
+
+    const titel =
+        document.getElementById("kiTitel").value.trim();
+
+    const fragen =
+        Number(document.getElementById("kiFragen").value);
+
+    const schwierigkeit =
+        document.getElementById("kiSchwierigkeit").value;
+
+    const zeit =
+        Number(document.getElementById("kiZeit").value);
+
+    const bestehen =
+        Number(document.getElementById("kiBestehen").value);
+
+
+    const meldung =
+        document.getElementById("kiMeldung");
+
+    const button =
+        document.getElementById("kiButton");
+
+
+    if(material.length < 50){
+
+        meldung.innerHTML =
+            '<div class="notice error">Bitte gib ausreichend Ausbildungsstoff ein.</div>';
+
+        return;
+    }
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "🤖 KI erstellt Prüfung...";
+
+
+    meldung.innerHTML =
+        '<div class="notice">Die Feuerwehr-KI erstellt gerade die Prüfung. Bitte warten...</div>';
+
+
+    try{
+
+        const data =
+            await api(
+                "/api/admin/ki/pruefung",
+                {
+                    method:"POST",
+
+                    body:JSON.stringify({
+
+                        material,
+                        titel,
+                        fragen,
+                        schwierigkeit,
+                        zeit,
+                        bestehen
+
+                    })
+                }
+            );
+
+
+        meldung.innerHTML =
+            `<div class="notice success">
+                Prüfung <strong>${escapeHtml(data.pruefung.titel)}</strong>
+                wurde erfolgreich erstellt.<br>
+                Prüfungscode:
+                <strong>${escapeHtml(data.pruefung.code)}</strong>
+            </div>`;
+
+
+        document.getElementById("kiMaterial").value = "";
+
+
+    }catch(error){
+
+        meldung.innerHTML =
+            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+
+    }finally{
+
+        button.disabled = false;
+
+        button.textContent =
+            "🤖 Prüfung mit KI erstellen";
+
+    }
 
 }
 
 
 /* =========================================================
    PRÜFUNGEN LADEN
-========================================================= */
+   ========================================================= */
 
-async function ladePruefungen() {
+async function ladePruefungen(){
 
-    const liste =
-        document.getElementById("pruefungsListe");
+    const container =
+        document.getElementById("pruefungenListe");
 
-    liste.innerHTML =
-        "⏳ Prüfungen werden geladen...";
 
-    try {
+    container.innerHTML =
+        "Wird geladen...";
 
-        const response =
-            await fetch(API_URL + "/api/pruefungen");
+
+    try{
 
         const data =
-            await response.json();
+            await api("/api/admin/pruefungen");
 
-        if (!response.ok)
-            throw new Error(data.error || "Fehler");
 
-        const pruefungen =
-            Array.isArray(data)
-                ? data
-                : data.pruefungen || [];
+        if(!data.pruefungen.length){
 
-        if (!pruefungen.length) {
-
-            liste.innerHTML =
-                "<p class='small'>Noch keine Prüfungen vorhanden.</p>";
+            container.innerHTML =
+                '<div class="notice">Noch keine Prüfungen vorhanden.</div>';
 
             return;
         }
 
-        liste.innerHTML = "";
 
-        pruefungen.forEach(pruefung => {
+        let html = `
+            <div class="tableWrap">
+            <table>
+            <thead>
+            <tr>
+                <th>Titel</th>
+                <th>Code</th>
+                <th>Fragen</th>
+                <th>Zeit</th>
+                <th>Erstellt</th>
+                <th>Link</th>
+            </tr>
+            </thead>
+            <tbody>
+        `;
 
-            const div =
-                document.createElement("div");
 
-            div.className = "exam-card";
+        data.pruefungen.forEach(p => {
 
-            div.innerHTML = `
-                <h3>🚒 ${sicher(pruefung.title)}</h3>
+            const link =
+                location.origin +
+                location.pathname +
+                "?pruefung=" +
+                encodeURIComponent(p.code);
 
-                <p>
-                    🔑 Code:
-                    <strong>${sicher(pruefung.code)}</strong>
-                </p>
 
-                <p class="small">
-                    ${pruefung.questions?.length || 0}
-                    Fragen
-                </p>
+            html += `
+                <tr>
 
-                <button
-                    class="btn secondary"
-                    onclick="kopiereLink('${sicherJS(pruefung.code)}')">
+                    <td>
+                        <strong>
+                            ${escapeHtml(p.titel)}
+                        </strong>
+                    </td>
 
-                    🔗 Teilnehmer-Link
+                    <td>
+                        <span class="badge red">
+                            ${escapeHtml(p.code)}
+                        </span>
+                    </td>
 
-                </button>
+                    <td>
+                        ${p.fragen.length}
+                    </td>
+
+                    <td>
+                        ${p.zeit} Min.
+                    </td>
+
+                    <td>
+                        ${formatDatum(p.createdAt)}
+                    </td>
+
+                    <td>
+                        <button class="btn btnBlue"
+                            onclick='kopiereLink(${JSON.stringify(link)})'>
+                            🔗 Kopieren
+                        </button>
+                    </td>
+
+                </tr>
             `;
-
-            liste.appendChild(div);
 
         });
 
-    } catch(error) {
 
-        liste.innerHTML =
-            "❌ Backend nicht erreichbar.<br><br>" +
-            "API: " + API_URL;
+        html += `
+            </tbody>
+            </table>
+            </div>
+        `;
+
+
+        container.innerHTML = html;
+
+
+    }catch(error){
+
+        container.innerHTML =
+            `<div class="notice error">${escapeHtml(error.message)}</div>`;
 
     }
 
@@ -787,121 +1644,109 @@ async function ladePruefungen() {
 
 
 /* =========================================================
-   KI PRÜFUNG ERSTELLEN
-========================================================= */
+   ERGEBNISSE
+   ========================================================= */
 
-async function erstellePruefung() {
+async function ladeErgebnisse(){
 
-    const titel =
-        document.getElementById("examTitle").value.trim();
-
-    const thema =
-        document.getElementById("examTopic").value.trim();
-
-    const material =
-        document.getElementById("examMaterial").value.trim();
-
-    const fragen =
-        Number(
-            document.getElementById("examQuestions").value
-        );
-
-    const schwierigkeit =
-        document.getElementById("examDifficulty").value;
-
-    const bestehen =
-        Number(
-            document.getElementById("examPass").value
-        );
-
-    const zeit =
-        Number(
-            document.getElementById("examTime").value
-        );
+    const container =
+        document.getElementById("ergebnisseListe");
 
 
-    if (!titel || !thema || !material) {
-
-        alert(
-            "Bitte Titel, Thema und Unterrichtsmaterial ausfüllen."
-        );
-
-        return;
-    }
+    container.innerHTML =
+        "Wird geladen...";
 
 
-    const status =
-        document.getElementById("kiStatus");
-
-    status.classList.remove("hidden");
-
-    status.textContent =
-        "🤖 Feuerwehr-KI erstellt deine Prüfung...";
-
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/ki/pruefung",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        title: titel,
-
-                        topic: thema,
-
-                        material: material,
-
-                        questionCount: fragen,
-
-                        difficulty: schwierigkeit,
-
-                        passPercent: bestehen,
-
-                        timeMinutes: zeit
-
-                    })
-
-                }
-            );
-
+    try{
 
         const data =
-            await response.json();
+            await api("/api/admin/ergebnisse");
 
 
-        if (!response.ok)
-            throw new Error(
-                data.error ||
-                "Prüfung konnte nicht erstellt werden."
-            );
+        if(!data.ergebnisse.length){
+
+            container.innerHTML =
+                '<div class="notice">Noch keine Ergebnisse vorhanden.</div>';
+
+            return;
+        }
 
 
-        status.textContent =
-            "✅ Prüfung erstellt! Code: " +
-            data.code;
+        let html = `
+            <div class="tableWrap">
+            <table>
+            <thead>
+            <tr>
+                <th>Teilnehmer</th>
+                <th>Feuerwehr</th>
+                <th>Prüfung</th>
+                <th>Ergebnis</th>
+                <th>Status</th>
+                <th>Datum</th>
+            </tr>
+            </thead>
+            <tbody>
+        `;
 
 
-        document.getElementById("examTitle").value = "";
-        document.getElementById("examTopic").value = "";
-        document.getElementById("examMaterial").value = "";
+        data.ergebnisse.forEach(r => {
+
+            html += `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(r.vorname)}
+                        ${escapeHtml(r.nachname)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(r.feuerwehr)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(r.pruefungTitel)}
+                    </td>
+
+                    <td>
+                        ${r.prozent}%
+                    </td>
+
+                    <td>
+
+                        ${
+                            r.bestanden
+                            ?
+                            '<span class="badge green">BESTANDEN</span>'
+                            :
+                            '<span class="badge red">NICHT BESTANDEN</span>'
+                        }
+
+                    </td>
+
+                    <td>
+                        ${formatDatum(r.createdAt)}
+                    </td>
+
+                </tr>
+            `;
+
+        });
 
 
-        await ladePruefungen();
+        html += `
+            </tbody>
+            </table>
+            </div>
+        `;
 
 
-    } catch(error) {
+        container.innerHTML = html;
 
-        status.textContent =
-            "❌ " + error.message;
+
+    }catch(error){
+
+        container.innerHTML =
+            `<div class="notice error">${escapeHtml(error.message)}</div>`;
 
     }
 
@@ -909,69 +1754,54 @@ async function erstellePruefung() {
 
 
 /* =========================================================
-   TEILNEHMER
-========================================================= */
+   PRÜFUNG STARTEN
+   ========================================================= */
 
-async function startePruefung() {
-
-    const code =
-        document.getElementById("teilnehmerCode")
-            .value
-            .trim();
+async function startePruefung(){
 
     const vorname =
-        document.getElementById("teilnehmerVorname")
-            .value
-            .trim();
+        document.getElementById("teilnehmerVorname").value.trim();
 
     const nachname =
-        document.getElementById("teilnehmerNachname")
-            .value
-            .trim();
+        document.getElementById("teilnehmerNachname").value.trim();
 
     const feuerwehr =
-        document.getElementById("teilnehmerFeuerwehr")
-            .value
-            .trim();
+        document.getElementById("teilnehmerFeuerwehr").value.trim();
+
+    const code =
+        document.getElementById("teilnehmerCode").value.trim().toUpperCase();
 
 
-    if (!code || !vorname || !nachname || !feuerwehr) {
+    const fehler =
+        document.getElementById("teilnehmerFehler");
 
-        zeigeFehler(
-            "teilnehmerFehler",
-            "Bitte alle Felder ausfüllen."
-        );
+
+    fehler.innerHTML = "";
+
+
+    if(!vorname || !nachname || !feuerwehr || !code){
+
+        fehler.innerHTML =
+            '<div class="notice error">Bitte alle Felder ausfüllen.</div>';
 
         return;
     }
 
 
-    try {
+    try{
 
-        const response =
-            await fetch(
-                API_URL +
+        const data =
+            await api(
                 "/api/pruefungen/code/" +
                 encodeURIComponent(code)
             );
 
 
-        const data =
-            await response.json();
-
-
-        if (!response.ok)
-            throw new Error(
-                data.error ||
-                "Prüfung nicht gefunden."
-            );
-
-
         aktuellePruefung =
-            data.pruefung || data;
+            data.pruefung;
 
 
-        teilnehmer = {
+        aktuellerTeilnehmer = {
 
             vorname,
             nachname,
@@ -982,12 +1812,11 @@ async function startePruefung() {
 
         zeigePruefung();
 
-    } catch(error) {
 
-        zeigeFehler(
-            "teilnehmerFehler",
-            "❌ " + error.message
-        );
+    }catch(error){
+
+        fehler.innerHTML =
+            `<div class="notice error">${escapeHtml(error.message)}</div>`;
 
     }
 
@@ -996,118 +1825,149 @@ async function startePruefung() {
 
 /* =========================================================
    PRÜFUNG ANZEIGEN
-========================================================= */
+   ========================================================= */
 
-function zeigePruefung() {
+function zeigePruefung(){
 
-    alleBereicheVerstecken();
+    versteckeAlleSeiten();
 
-    document.getElementById("pruefung")
+    document
+        .getElementById("seitePruefung")
         .classList.remove("hidden");
 
 
     document.getElementById("pruefungTitel")
         .textContent =
-        aktuellePruefung.title ||
-        "Feuerwehrprüfung";
+        aktuellePruefung.titel;
 
 
-    document.getElementById("pruefungInfo")
+    document.getElementById("pruefungTitelTop")
         .textContent =
-        `${aktuellePruefung.questions.length} Fragen`;
+        aktuellePruefung.titel;
+
+
+    document.getElementById("pruefungTeilnehmerTop")
+        .textContent =
+        aktuellerTeilnehmer.vorname +
+        " " +
+        aktuellerTeilnehmer.nachname;
+
+
+    document.getElementById("pruefungBeschreibung")
+        .textContent =
+        aktuellePruefung.beschreibung ||
+        "Beantworte alle Fragen."
 
 
     const container =
-        document.getElementById("fragen");
+        document.getElementById("fragenContainer");
+
 
     container.innerHTML = "";
 
 
-    aktuellePruefung.questions.forEach(
+    aktuellePruefung.fragen.forEach(
         (frage,index) => {
 
-            const div =
+            const box =
                 document.createElement("div");
 
-            div.className = "question";
+            box.className =
+                "card question";
 
 
-            let html =
-                `<h3>${index + 1}. ${sicher(frage.question)}</h3>`;
+            let antwortHTML = "";
 
 
-            if (
-                frage.type === "multiple" &&
-                Array.isArray(frage.options)
-            ) {
+            if(frage.typ === "multiple"){
 
-                frage.options.forEach(
-                    (option,optionIndex) => {
+                antwortHTML =
+                    frage.optionen.map(
+                        (option,optionIndex) => `
 
-                        html += `
-                            <label class="option">
+                        <label class="option">
 
-                                <input
-                                    type="radio"
-                                    name="frage_${index}"
-                                    value="${optionIndex}">
+                            <input
+                                type="radio"
+                                name="frage_${index}"
+                                value="${optionIndex}">
 
-                                ${sicher(option)}
+                            <span>
+                                ${escapeHtml(option)}
+                            </span>
 
-                            </label>
-                        `;
+                        </label>
 
-                    }
-                );
+                    `
+                    ).join("");
 
             }
-            else if (
-                frage.type === "truefalse"
-            ) {
 
-                html += `
+
+            else if(frage.typ === "truefalse"){
+
+                antwortHTML = `
+
                     <label class="option">
+
                         <input
                             type="radio"
                             name="frage_${index}"
                             value="true">
-                        Richtig
+
+                        <span>Richtig</span>
+
                     </label>
 
                     <label class="option">
+
                         <input
                             type="radio"
                             name="frage_${index}"
                             value="false">
-                        Falsch
+
+                        <span>Falsch</span>
+
                     </label>
+
                 `;
 
             }
-            else {
 
-                html += `
+
+            else{
+
+                antwortHTML = `
+
                     <textarea
-                        id="text_${index}"
+                        id="textantwort_${index}"
                         placeholder="Deine Antwort..."></textarea>
+
                 `;
 
             }
 
 
-            div.innerHTML = html;
+            box.innerHTML = `
 
-            container.appendChild(div);
+                <div class="questionTitle">
+                    ${index + 1}.
+                    ${escapeHtml(frage.frage)}
+                </div>
+
+                ${antwortHTML}
+
+            `;
+
+
+            container.appendChild(box);
 
         }
     );
 
 
     starteTimer(
-        Number(
-            aktuellePruefung.timeMinutes ||
-            30
-        ) * 60
+        Number(aktuellePruefung.zeit) * 60
     );
 
 }
@@ -1115,29 +1975,33 @@ function zeigePruefung() {
 
 /* =========================================================
    TIMER
-========================================================= */
+   ========================================================= */
 
-function starteTimer(sekunden) {
+function starteTimer(sekunden){
 
-    clearInterval(timerInterval);
+    stoppeTimer();
 
-    restSekunden = sekunden;
+    verbleibendeSekunden =
+        sekunden;
+
 
     aktualisiereTimer();
+
 
     timerInterval =
         setInterval(() => {
 
-            restSekunden--;
+            verbleibendeSekunden--;
 
             aktualisiereTimer();
 
-            if (restSekunden <= 0) {
 
-                clearInterval(timerInterval);
+            if(verbleibendeSekunden <= 0){
+
+                stoppeTimer();
 
                 alert(
-                    "⏰ Die Prüfungszeit ist abgelaufen."
+                    "Die Prüfungszeit ist abgelaufen. Die Prüfung wird abgegeben."
                 );
 
                 pruefungAbgeben();
@@ -1149,13 +2013,14 @@ function starteTimer(sekunden) {
 }
 
 
-function aktualisiereTimer() {
+function aktualisiereTimer(){
 
     const minuten =
-        Math.floor(restSekunden / 60);
+        Math.floor(verbleibendeSekunden / 60);
 
     const sekunden =
-        restSekunden % 60;
+        verbleibendeSekunden % 60;
+
 
     document.getElementById("timer")
         .textContent =
@@ -1166,134 +2031,107 @@ function aktualisiereTimer() {
 }
 
 
+function stoppeTimer(){
+
+    if(timerInterval){
+
+        clearInterval(timerInterval);
+
+        timerInterval = null;
+
+    }
+
+}
+
+
 /* =========================================================
    PRÜFUNG ABGEBEN
-========================================================= */
+   ========================================================= */
 
-async function pruefungAbgeben() {
+async function pruefungAbgeben(){
 
-    clearInterval(timerInterval);
+    if(!aktuellePruefung){
+        return;
+    }
+
+
+    stoppeTimer();
+
 
     const antworten = [];
 
 
-    aktuellePruefung.questions.forEach(
+    aktuellePruefung.fragen.forEach(
         (frage,index) => {
 
-            if (
-                frage.type === "text"
-            ) {
+            let antwort = "";
 
-                antworten.push(
+
+            if(frage.typ === "text"){
+
+                const el =
                     document.getElementById(
-                        "text_" + index
-                    )?.value || ""
-                );
+                        "textantwort_" + index
+                    );
 
-                return;
+                antwort =
+                    el ? el.value.trim() : "";
+
+            }else{
+
+                const checked =
+                    document.querySelector(
+                        `input[name="frage_${index}"]:checked`
+                    );
+
+                antwort =
+                    checked ? checked.value : "";
+
             }
 
 
-            const selected =
-                document.querySelector(
-                    `input[name="frage_${index}"]:checked`
-                );
-
-
-            antworten.push(
-                selected
-                    ? selected.value
-                    : null
-            );
+            antworten.push(antwort);
 
         }
     );
 
 
-    try {
+    try{
 
-        const response =
-            await fetch(
-                API_URL +
+        const data =
+            await api(
                 "/api/teilnehmer/abgabe",
                 {
+                    method:"POST",
 
-                    method: "POST",
+                    body:JSON.stringify({
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        examId:
-                            aktuellePruefung.id,
-
-                        code:
+                        pruefungCode:
                             aktuellePruefung.code,
 
-                        teilnehmer:
-                            teilnehmer,
+                        vorname:
+                            aktuellerTeilnehmer.vorname,
 
-                        answers:
-                            antworten
+                        nachname:
+                            aktuellerTeilnehmer.nachname,
+
+                        feuerwehr:
+                            aktuellerTeilnehmer.feuerwehr,
+
+                        antworten
 
                     })
-
                 }
             );
 
 
-        const data =
-            await response.json();
+        zeigeErgebnis(data.ergebnis);
 
 
-        if (!response.ok)
-            throw new Error(
-                data.error ||
-                "Abgabe fehlgeschlagen."
-            );
-
-
-        alleBereicheVerstecken();
-
-        document.getElementById("ergebnis")
-            .classList.remove("hidden");
-
-
-        const bestanden =
-            data.bestanden;
-
-
-        document.getElementById(
-            "ergebnisText"
-        ).innerHTML = `
-
-            <div class="score ${bestanden ? "good" : "bad"}">
-                ${data.percent}%
-            </div>
-
-            <h3>
-                ${bestanden
-                    ? "✅ Bestanden"
-                    : "❌ Nicht bestanden"}
-            </h3>
-
-            <p>
-                ${data.correct}
-                von
-                ${data.total}
-                Fragen richtig.
-            </p>
-
-        `;
-
-
-    } catch(error) {
+    }catch(error){
 
         alert(
-            "Fehler beim Absenden:\n\n" +
+            "Fehler beim Abgeben: " +
             error.message
         );
 
@@ -1303,31 +2141,153 @@ async function pruefungAbgeben() {
 
 
 /* =========================================================
+   ERGEBNIS
+   ========================================================= */
+
+function zeigeErgebnis(ergebnis){
+
+    versteckeAlleSeiten();
+
+    document
+        .getElementById("seiteErgebnis")
+        .classList.remove("hidden");
+
+
+    const circle =
+        document.getElementById("resultCircle");
+
+
+    circle.textContent =
+        ergebnis.prozent + "%";
+
+
+    document.getElementById("ergebnisTitel")
+        .textContent =
+        ergebnis.bestanden
+        ? "🎉 Prüfung bestanden!"
+        : "❌ Prüfung nicht bestanden";
+
+
+    document.getElementById("ergebnisText")
+        .textContent =
+        ergebnis.bestanden
+        ? "Herzlichen Glückwunsch! Die erforderliche Punktzahl wurde erreicht."
+        : "Die erforderliche Punktzahl wurde leider nicht erreicht.";
+
+
+    document.getElementById("ergebnisDetails")
+        .innerHTML = `
+
+            <div class="notice">
+
+                <strong>Punkte:</strong>
+                ${ergebnis.punkte}
+                /
+                ${ergebnis.maxPunkte}
+
+                <br><br>
+
+                <strong>Ergebnis:</strong>
+                ${ergebnis.prozent}%
+
+                <br><br>
+
+                <strong>Bestehensgrenze:</strong>
+                ${ergebnis.bestehensgrenze}%
+
+            </div>
+
+        `;
+
+}
+
+
+/* =========================================================
+   API
+   ========================================================= */
+
+async function api(path,options={}){
+
+    const headers =
+        options.headers || {};
+
+
+    headers["Content-Type"] =
+        "application/json";
+
+
+    const token =
+        adminToken();
+
+
+    if(token){
+
+        headers["Authorization"] =
+            "Bearer " + token;
+
+    }
+
+
+    const response =
+        await fetch(
+            API_URL + path,
+            {
+                ...options,
+                headers
+            }
+        );
+
+
+    let data = {};
+
+
+    try{
+
+        data =
+            await response.json();
+
+    }catch{
+
+        data = {};
+
+    }
+
+
+    if(!response.ok){
+
+        throw new Error(
+            data.error ||
+            "Serverfehler (" +
+            response.status +
+            ")"
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+/* =========================================================
    LINK
-========================================================= */
+   ========================================================= */
 
-function kopiereLink(code) {
+async function kopiereLink(link){
 
-    const link =
-        window.location.origin +
-        window.location.pathname +
-        "?code=" +
-        encodeURIComponent(code);
+    try{
 
-
-    if (navigator.clipboard) {
-
-        navigator.clipboard.writeText(link);
+        await navigator.clipboard.writeText(link);
 
         alert(
-            "Teilnehmer-Link kopiert:\n\n" +
-            link
+            "Prüfungslink wurde kopiert."
         );
 
-    } else {
+    }catch{
 
         prompt(
-            "Teilnehmer-Link:",
+            "Prüfungslink:",
             link
         );
 
@@ -1337,38 +2297,10 @@ function kopiereLink(code) {
 
 
 /* =========================================================
-   URL CODE
-========================================================= */
+   HILFSFUNKTIONEN
+   ========================================================= */
 
-function pruefeURLCode() {
-
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-    const code =
-        params.get("code");
-
-
-    if (code) {
-
-        document.getElementById(
-            "teilnehmerCode"
-        ).value = code;
-
-        zeigeTeilnehmer();
-
-    }
-
-}
-
-
-/* =========================================================
-   SICHERHEIT
-========================================================= */
-
-function sicher(value) {
+function escapeHtml(value){
 
     return String(value ?? "")
         .replaceAll("&","&amp;")
@@ -1380,35 +2312,59 @@ function sicher(value) {
 }
 
 
-function sicherJS(value) {
+function formatDatum(value){
 
-    return String(value ?? "")
-        .replaceAll("\\","\\\\")
-        .replaceAll("'","\\'");
+    if(!value){
+        return "-";
+    }
+
+    return new Date(value)
+        .toLocaleString("de-DE");
+
+}
+
+
+/* =========================================================
+   URL PRÜFUNGSCODE
+   ========================================================= */
+
+async function pruefeURLCode(){
+
+    const params =
+        new URLSearchParams(
+            location.search
+        );
+
+
+    const code =
+        params.get("pruefung");
+
+
+    if(!code){
+        return;
+    }
+
+
+    zeigeTeilnehmerStart();
+
+
+    document.getElementById(
+        "teilnehmerCode"
+    ).value =
+        code.toUpperCase();
 
 }
 
 
 /* =========================================================
    START
-========================================================= */
+   ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
 
-        if (
-            localStorage.getItem("FW_ADMIN")
-            === "true"
-        ) {
-
-            zeigeAdmin();
-
-        } else {
-
-            pruefeURLCode();
-
-        }
+        pruefeURLCode();
 
     }
 );
