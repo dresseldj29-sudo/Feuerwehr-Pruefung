@@ -7,19 +7,20 @@
 <title>Feuerwehr Prüfungsplattform</title>
 
 <style>
+
 :root{
     --red:#c8102e;
     --red2:#ff334f;
-    --dark:#0b0d10;
-    --dark2:#11151a;
-    --card:#171c22;
-    --card2:#1d232b;
+    --dark:#080a0d;
+    --dark2:#101419;
+    --card:#151a20;
+    --card2:#1b2128;
     --border:#2b333d;
     --text:#f5f7fa;
-    --muted:#aab2bd;
-    --green:#25c281;
-    --yellow:#f4c542;
-    --blue:#3d8bfd;
+    --muted:#9ea7b2;
+    --green:#20c884;
+    --yellow:#e8bb3d;
+    --blue:#397ff0;
 }
 
 *{
@@ -29,13 +30,19 @@
 html,
 body{
     margin:0;
-    padding:0;
     min-height:100%;
-    font-family:Arial,Helvetica,sans-serif;
     background:
-        radial-gradient(circle at top right,#2a0b10 0,#0b0d10 38%),
-        #0b0d10;
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(200,16,46,.18),
+            transparent 35%
+        ),
+        #080a0d;
     color:var(--text);
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
 button,
@@ -53,19 +60,26 @@ button{
     display:none!important;
 }
 
-/* HEADER */
+.container{
+    width:min(1250px,calc(100% - 30px));
+    margin:auto;
+}
 
 .header{
+    height:72px;
     position:sticky;
     top:0;
-    z-index:100;
-    height:72px;
+    z-index:1000;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 28px;
-    background:rgba(11,13,16,.94);
+
+    padding:0 25px;
+
+    background:rgba(8,10,13,.95);
     backdrop-filter:blur(15px);
+
     border-bottom:1px solid var(--border);
 }
 
@@ -73,30 +87,35 @@ button{
     display:flex;
     align-items:center;
     gap:12px;
-    font-weight:800;
-    font-size:20px;
+
+    font-size:19px;
+    font-weight:900;
 }
 
 .logoIcon{
-    width:42px;
-    height:42px;
+    width:43px;
+    height:43px;
+
     display:grid;
     place-items:center;
+
     border-radius:12px;
-    background:linear-gradient(135deg,var(--red),#790016);
-    box-shadow:0 8px 25px rgba(200,16,46,.3);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--red2),
+            #790016
+        );
+
+    box-shadow:
+        0 8px 25px
+        rgba(200,16,46,.3);
 }
 
 .headerRight{
     display:flex;
-    gap:10px;
-}
-
-/* LAYOUT */
-
-.container{
-    width:min(1200px,calc(100% - 30px));
-    margin:0 auto;
+    gap:8px;
 }
 
 .page{
@@ -106,50 +125,81 @@ button{
 
 .hero{
     text-align:center;
-    padding:55px 15px 35px;
+    padding:60px 15px 45px;
 }
 
 .heroBadge{
     display:inline-flex;
+
     padding:8px 14px;
+
     border-radius:999px;
+
     background:rgba(200,16,46,.12);
     border:1px solid rgba(200,16,46,.4);
-    color:#ff6a7e;
-    font-weight:700;
+
+    color:#ff7285;
+    font-weight:800;
+
     margin-bottom:20px;
 }
 
 .hero h1{
-    font-size:clamp(36px,6vw,68px);
     margin:0;
-    line-height:1;
+
+    font-size:
+        clamp(
+            40px,
+            7vw,
+            75px
+        );
+
+    line-height:.95;
 }
 
 .hero p{
-    max-width:700px;
-    margin:22px auto;
-    color:var(--muted);
-    font-size:18px;
-    line-height:1.6;
-}
+    max-width:760px;
 
-/* CARDS */
+    margin:25px auto;
+
+    color:var(--muted);
+
+    font-size:18px;
+    line-height:1.65;
+}
 
 .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(250px,1fr)
+        );
+
     gap:18px;
 }
 
 .card{
-    background:linear-gradient(180deg,var(--card2),var(--card));
+    background:
+        linear-gradient(
+            180deg,
+            var(--card2),
+            var(--card)
+        );
+
     border:1px solid var(--border);
+
     border-radius:18px;
+
     padding:22px;
-    box-shadow:0 15px 40px rgba(0,0,0,.2);
+
+    box-shadow:
+        0 18px 45px
+        rgba(0,0,0,.22);
 }
 
+.card h1,
 .card h2,
 .card h3{
     margin-top:0;
@@ -160,16 +210,20 @@ button{
     line-height:1.6;
 }
 
-/* BUTTONS */
-
 .btn{
     border:0;
-    border-radius:12px;
-    padding:13px 18px;
+
+    border-radius:11px;
+
+    padding:12px 17px;
+
     color:white;
-    background:#2a313a;
-    transition:.18s;
-    font-weight:700;
+
+    background:#2b333d;
+
+    font-weight:800;
+
+    transition:.15s;
 }
 
 .btn:hover{
@@ -177,24 +231,35 @@ button{
     filter:brightness(1.1);
 }
 
+.btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+    transform:none;
+}
+
 .btnRed{
-    background:linear-gradient(135deg,var(--red2),var(--red));
+    background:
+        linear-gradient(
+            135deg,
+            var(--red2),
+            var(--red)
+        );
 }
 
 .btnGreen{
-    background:#158b5d;
+    background:#138656;
 }
 
 .btnBlue{
-    background:#236bd0;
+    background:#246bd0;
 }
 
 .btnYellow{
-    background:#a77d08;
+    background:#96720b;
 }
 
 .btnDanger{
-    background:#8d1429;
+    background:#84162a;
 }
 
 .btnGhost{
@@ -202,11 +267,22 @@ button{
     border:1px solid var(--border);
 }
 
-/* FORM */
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+}
 
 .formGrid{
     display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
     gap:15px;
 }
 
@@ -221,19 +297,24 @@ button{
 }
 
 .field label{
-    color:#d9dee5;
-    font-weight:700;
+    font-weight:800;
 }
 
 input,
 textarea,
 select{
     width:100%;
-    background:#0e1217;
-    color:white;
-    border:1px solid var(--border);
-    border-radius:11px;
+
     padding:13px;
+
+    color:white;
+
+    background:#0c1014;
+
+    border:1px solid var(--border);
+
+    border-radius:11px;
+
     outline:none;
 }
 
@@ -241,37 +322,68 @@ input:focus,
 textarea:focus,
 select:focus{
     border-color:var(--red);
-    box-shadow:0 0 0 3px rgba(200,16,46,.1);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(200,16,46,.12);
 }
 
 textarea{
-    min-height:180px;
+    min-height:190px;
     resize:vertical;
 }
 
-/* ACTIONS */
+.notice{
+    padding:14px;
 
-.actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:18px;
+    border-radius:11px;
+
+    background:#13191f;
+
+    border:1px solid var(--border);
+
+    margin:15px 0;
+
+    line-height:1.5;
 }
 
-/* STATS */
+.notice.error{
+    background:#291017;
+    border-color:#7d2032;
+}
+
+.notice.success{
+    background:#10271e;
+    border-color:#1a7753;
+}
+
+.notice.warning{
+    background:#29230f;
+    border-color:#75611c;
+}
 
 .stats{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+
+    grid-template-columns:
+        repeat(
+            4,
+            1fr
+        );
+
     gap:14px;
+
     margin-bottom:20px;
 }
 
 .stat{
-    background:var(--card);
-    border:1px solid var(--border);
     padding:18px;
+
     border-radius:15px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
 }
 
 .statValue{
@@ -284,101 +396,182 @@ textarea{
     margin-top:5px;
 }
 
-/* ADMIN */
-
 .adminLayout{
     display:grid;
-    grid-template-columns:230px 1fr;
+
+    grid-template-columns:
+        230px
+        1fr;
+
     gap:18px;
 }
 
 .sidebar{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:18px;
-    padding:12px;
     height:max-content;
+
     position:sticky;
     top:90px;
+
+    padding:12px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
 }
 
 .sideBtn{
     width:100%;
-    text-align:left;
-    margin-bottom:7px;
+
     border:0;
+
+    text-align:left;
+
     padding:13px;
+
+    margin-bottom:7px;
+
     border-radius:10px;
+
+    color:#cbd2da;
+
     background:transparent;
-    color:#cfd5dc;
 }
 
 .sideBtn:hover,
 .sideBtn.active{
-    background:rgba(200,16,46,.15);
     color:white;
-}
 
-.adminContent{
-    min-width:0;
+    background:
+        rgba(200,16,46,.15);
 }
-
-/* TABLE */
 
 .tableWrap{
     overflow:auto;
+
     border:1px solid var(--border);
+
     border-radius:14px;
 }
 
 table{
     width:100%;
+    min-width:800px;
+
     border-collapse:collapse;
-    min-width:700px;
 }
 
 th,
 td{
     padding:13px;
-    border-bottom:1px solid var(--border);
+
     text-align:left;
+
+    border-bottom:
+        1px solid var(--border);
 }
 
 th{
-    color:#cfd5dc;
-    background:#12161b;
+    background:#11161b;
+    color:#d9dee5;
 }
 
 td{
     color:#e9edf2;
 }
 
-/* QUESTION */
+.badge{
+    display:inline-flex;
+
+    padding:6px 10px;
+
+    border-radius:999px;
+
+    background:#252d36;
+
+    font-size:12px;
+    font-weight:900;
+}
+
+.badge.green{
+    color:#4ee0a2;
+    background:rgba(32,200,132,.13);
+}
+
+.badge.red{
+    color:#ff7184;
+    background:rgba(200,16,46,.14);
+}
+
+.badge.yellow{
+    color:#ffd861;
+    background:rgba(232,187,61,.14);
+}
+
+.aiBox{
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(200,16,46,.20),
+            transparent 45%
+        ),
+        var(--card);
+}
+
+.aiTitle{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:22px;
+    font-weight:900;
+}
+
+.aiPulse{
+    width:11px;
+    height:11px;
+
+    border-radius:50%;
+
+    background:#ff3b58;
+
+    box-shadow:
+        0 0 16px
+        #ff3b58;
+}
 
 .question{
-    margin-bottom:20px;
+    margin-top:20px;
 }
 
 .questionTitle{
     font-size:19px;
-    font-weight:800;
+    font-weight:900;
+
     margin-bottom:13px;
 }
 
 .option{
     display:flex;
-    align-items:flex-start;
+
     gap:10px;
+
     padding:13px;
+
     margin:8px 0;
+
     background:#10151a;
+
     border:1px solid var(--border);
+
     border-radius:11px;
+
     cursor:pointer;
 }
 
 .option:hover{
-    border-color:#4b5663;
+    border-color:#56616d;
 }
 
 .option input{
@@ -386,73 +579,68 @@ td{
     margin-top:3px;
 }
 
-/* TIMER */
-
 .examTop{
     position:sticky;
+
     top:72px;
-    z-index:50;
-    background:rgba(11,13,16,.94);
+
+    z-index:500;
+
+    padding:12px 0;
+
+    background:
+        rgba(8,10,13,.96);
+
     backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--border);
-    padding:13px 0;
+
+    border-bottom:
+        1px solid var(--border);
 }
 
 .examTopInner{
     display:flex;
-    align-items:center;
+
     justify-content:space-between;
+
+    align-items:center;
+
     gap:15px;
 }
 
 .timer{
     padding:10px 15px;
-    background:#40121b;
-    border:1px solid #78202f;
-    color:#ff7387;
+
     border-radius:10px;
-    font-weight:900;
+
+    background:#40121b;
+
+    border:1px solid #792334;
+
+    color:#ff7184;
+
     font-size:20px;
+
+    font-weight:900;
 }
-
-/* BADGES */
-
-.badge{
-    display:inline-flex;
-    align-items:center;
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:800;
-    background:#252c35;
-}
-
-.badge.green{
-    background:rgba(37,194,129,.13);
-    color:#50e3a3;
-}
-
-.badge.red{
-    background:rgba(200,16,46,.15);
-    color:#ff7084;
-}
-
-.badge.yellow{
-    background:rgba(244,197,66,.15);
-    color:#ffd967;
-}
-
-/* RESULT */
 
 .resultCircle{
-    width:150px;
-    height:150px;
-    margin:10px auto 25px;
-    border-radius:50%;
+    width:155px;
+    height:155px;
+
+    margin:
+        10px auto
+        25px;
+
     display:grid;
     place-items:center;
-    border:8px solid var(--red);
-    font-size:34px;
+
+    border-radius:50%;
+
+    border:
+        8px solid
+        var(--red);
+
+    font-size:35px;
     font-weight:900;
 }
 
@@ -460,59 +648,52 @@ td{
     text-align:center;
 }
 
-.notice{
-    padding:14px;
-    border-radius:11px;
-    margin:15px 0;
-    background:#141a20;
-    border:1px solid var(--border);
-}
-
-.notice.error{
-    border-color:#7f1e2f;
-    background:#281118;
-}
-
-.notice.success{
-    border-color:#176e4d;
-    background:#10241c;
-}
-
-/* AI */
-
-.aiBox{
-    border:1px solid #7d2637;
-    background:
-        radial-gradient(circle at top right,rgba(200,16,46,.18),transparent 45%),
-        #171419;
-}
-
-.aiTitle{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight:900;
-    font-size:21px;
-}
-
-.aiPulse{
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    background:#ff405a;
-    box-shadow:0 0 15px #ff405a;
-}
-
-/* FOOTER */
-
 .footer{
     padding:30px 0;
+
     text-align:center;
-    color:#707984;
-    border-top:1px solid var(--border);
+
+    color:#68727e;
+
+    border-top:
+        1px solid
+        var(--border);
 }
 
-/* MOBILE */
+.fileBox{
+    padding:18px;
+
+    border:1px dashed #4b5663;
+
+    border-radius:13px;
+
+    background:#10151a;
+}
+
+.fileBox input{
+    border:0;
+    background:transparent;
+    padding:0;
+}
+
+.small{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.linkBox{
+    word-break:break-all;
+
+    padding:12px;
+
+    background:#0b1014;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    color:#9ec5ff;
+}
 
 @media(max-width:850px){
 
@@ -525,7 +706,11 @@ td{
     }
 
     .stats{
-        grid-template-columns:repeat(2,1fr);
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
     }
 
     .formGrid{
@@ -534,10 +719,6 @@ td{
 
     .field.full{
         grid-column:auto;
-    }
-
-    .header{
-        padding:0 15px;
     }
 
     .logo span{
@@ -551,218 +732,381 @@ td{
         grid-template-columns:1fr;
     }
 
+    .header{
+        padding:0 12px;
+    }
+
     .hero{
-        padding-top:30px;
+        padding-top:35px;
     }
 
     .hero h1{
-        font-size:40px;
-    }
-
-    .page{
-        padding-top:20px;
+        font-size:42px;
     }
 }
+
 </style>
 </head>
 
 <body>
 
+
 <header class="header">
+
     <div class="logo">
-        <div class="logoIcon">🚒</div>
-        <span>Feuerwehr Prüfungsplattform</span>
+
+        <div class="logoIcon">
+            🚒
+        </div>
+
+        <span>
+            Feuerwehr Prüfungsplattform
+        </span>
+
     </div>
 
     <div class="headerRight">
-        <button class="btn btnGhost" onclick="zeigeStart()">Start</button>
-        <button class="btn btnGhost" onclick="zeigeAdminLogin()">Ausbilder</button>
+
+        <button
+            class="btn btnGhost"
+            onclick="zeigeStart()">
+
+            Start
+
+        </button>
+
+        <button
+            class="btn btnGhost"
+            onclick="zeigeAdminLogin()">
+
+            🔐 Ausbilder
+
+        </button>
+
     </div>
+
 </header>
 
 
-<!-- START -->
+<!-- =====================================================
+     START
+===================================================== -->
 
-<section id="seiteStart" class="page">
+<section
+    id="seiteStart"
+    class="page">
+
 <div class="container">
 
     <div class="hero">
-        <div class="heroBadge">🚒 Digitale Feuerwehr-Ausbildung</div>
 
-        <h1>Feuerwehr<br>Prüfungsplattform</h1>
+        <div class="heroBadge">
+            🚒 Digitale Feuerwehr-Ausbildung
+        </div>
+
+        <h1>
+            Feuerwehr<br>
+            Prüfungsplattform
+        </h1>
 
         <p>
-            Prüfungen erstellen, Teilnehmer prüfen und Ergebnisse auswerten –
-            alles zentral in einer modernen Plattform mit integrierter KI.
+            Prüfungen erstellen, Ausbildungsstoff mit KI
+            in Fragen umwandeln, Teilnehmer prüfen und
+            Ergebnisse auswerten.
         </p>
 
-        <div class="actions" style="justify-content:center">
-            <button class="btn btnRed" onclick="zeigeTeilnehmerStart()">
+        <div
+            class="actions"
+            style="justify-content:center">
+
+            <button
+                class="btn btnRed"
+                onclick="zeigeTeilnehmerStart()">
+
                 📝 Prüfung starten
+
             </button>
 
-            <button class="btn btnGhost" onclick="zeigeAdminLogin()">
+            <button
+                class="btn btnGhost"
+                onclick="zeigeAdminLogin()">
+
                 🔐 Ausbilderbereich
+
             </button>
+
         </div>
+
     </div>
+
 
     <div class="grid">
 
         <div class="card">
-            <h3>🤖 Feuerwehr-KI</h3>
+
+            <h3>
+                🤖 Feuerwehr-KI
+            </h3>
+
             <p>
-                Deine Schulungsunterlagen werden von der KI analysiert
-                und daraus werden automatisch passende Prüfungsfragen erstellt.
+                Ausbildungsunterlagen einfügen oder
+                als Textdatei laden und automatisch
+                eine komplette Prüfung erzeugen.
             </p>
+
         </div>
 
-        <div class="card">
-            <h3>📝 Digitale Prüfung</h3>
-            <p>
-                Teilnehmer bearbeiten Multiple-Choice-, Richtig/Falsch-
-                und Freitextfragen direkt auf der Website.
-            </p>
-        </div>
 
         <div class="card">
-            <h3>📊 Auswertung</h3>
+
+            <h3>
+                📝 Digitale Prüfung
+            </h3>
+
             <p>
-                Punkte, Prozentwerte und bestanden/nicht bestanden
-                werden automatisch berechnet.
+                Multiple Choice, Richtig/Falsch und
+                Freitextfragen mit Zeitlimit.
             </p>
+
         </div>
 
+
         <div class="card">
-            <h3>💾 Speicherung</h3>
+
+            <h3>
+                📊 Auswertung
+            </h3>
+
             <p>
-                Prüfungen und Ergebnisse werden dauerhaft auf dem
-                Backend gespeichert.
+                Punkte, Prozentzahl und
+                Bestehensstatus werden automatisch
+                berechnet.
             </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>
+                💾 Speicherung
+            </h3>
+
+            <p>
+                Prüfungen und Ergebnisse werden
+                auf dem Backend gespeichert.
+            </p>
+
         </div>
 
     </div>
 
 </div>
+
 </section>
 
 
-<!-- TEILNEHMER START -->
+<!-- =====================================================
+     TEILNEHMER
+===================================================== -->
 
-<section id="seiteTeilnehmer" class="page hidden">
+<section
+    id="seiteTeilnehmer"
+    class="page hidden">
+
 <div class="container">
 
-    <div class="card" style="max-width:700px;margin:auto">
+    <div
+        class="card"
+        style="max-width:700px;margin:auto">
 
-        <h1>👨‍🚒 Prüfung starten</h1>
+        <h1>
+            👨‍🚒 Prüfung starten
+        </h1>
 
         <p>
-            Gib deine persönlichen Daten und den Prüfungscode ein.
+            Trage deine Daten und den
+            Prüfungscode ein.
         </p>
 
         <div id="teilnehmerFehler"></div>
 
+
         <div class="formGrid">
 
             <div class="field">
-                <label>Vorname</label>
-                <input id="teilnehmerVorname" placeholder="Max">
+
+                <label>
+                    Vorname
+                </label>
+
+                <input
+                    id="teilnehmerVorname"
+                    placeholder="Max">
+
             </div>
+
 
             <div class="field">
-                <label>Nachname</label>
-                <input id="teilnehmerNachname" placeholder="Mustermann">
+
+                <label>
+                    Nachname
+                </label>
+
+                <input
+                    id="teilnehmerNachname"
+                    placeholder="Mustermann">
+
             </div>
 
-            <div class="field full">
-                <label>Feuerwehr</label>
-                <input id="teilnehmerFeuerwehr"
-                       placeholder="Freiwillige Feuerwehr Musterstadt">
-            </div>
 
             <div class="field full">
-                <label>Prüfungscode</label>
-                <input id="teilnehmerCode"
-                       placeholder="z.B. TM1-2026"
-                       style="text-transform:uppercase">
+
+                <label>
+                    Feuerwehr
+                </label>
+
+                <input
+                    id="teilnehmerFeuerwehr"
+                    placeholder="Freiwillige Feuerwehr Musterstadt">
+
+            </div>
+
+
+            <div class="field full">
+
+                <label>
+                    Prüfungscode
+                </label>
+
+                <input
+                    id="teilnehmerCode"
+                    placeholder="FW-ABCDE">
+
             </div>
 
         </div>
 
+
         <div class="actions">
-            <button class="btn btnRed" onclick="startePruefung()">
+
+            <button
+                class="btn btnRed"
+                onclick="startePruefung()">
+
                 Prüfung laden
+
             </button>
 
-            <button class="btn btnGhost" onclick="zeigeStart()">
+            <button
+                class="btn btnGhost"
+                onclick="zeigeStart()">
+
                 Zurück
+
             </button>
+
         </div>
 
     </div>
 
 </div>
-</section>
-
-
-<!-- PRÜFUNG -->
-
-<section id="seitePruefung" class="hidden">
-
-    <div class="examTop">
-        <div class="container examTopInner">
-
-            <div>
-                <strong id="pruefungTitelTop">Prüfung</strong>
-                <div id="pruefungTeilnehmerTop"
-                     style="font-size:13px;color:var(--muted)">
-                </div>
-            </div>
-
-            <div class="timer" id="timer">
-                00:00
-            </div>
-
-        </div>
-    </div>
-
-    <div class="page">
-    <div class="container">
-
-        <div class="card">
-
-            <h1 id="pruefungTitel">Prüfung</h1>
-
-            <p id="pruefungBeschreibung"></p>
-
-            <div id="fragenContainer"></div>
-
-            <div class="actions">
-                <button class="btn btnRed"
-                        onclick="pruefungAbgeben()">
-                    📨 Prüfung abgeben
-                </button>
-            </div>
-
-        </div>
-
-    </div>
-    </div>
 
 </section>
 
 
-<!-- ERGEBNIS -->
+<!-- =====================================================
+     PRÜFUNG
+===================================================== -->
 
-<section id="seiteErgebnis" class="page hidden">
+<section
+    id="seitePruefung"
+    class="hidden">
+
+<div class="examTop">
+
+    <div class="container examTopInner">
+
+        <div>
+
+            <strong
+                id="pruefungTitelTop">
+                Prüfung
+            </strong>
+
+            <div
+                id="pruefungTeilnehmerTop"
+                class="small">
+            </div>
+
+        </div>
+
+        <div
+            id="timer"
+            class="timer">
+            00:00
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="page">
+
 <div class="container">
 
-    <div class="card resultCenter"
-         style="max-width:700px;margin:auto">
+    <div class="card">
 
-        <div id="resultCircle"
-             class="resultCircle">
+        <h1 id="pruefungTitel">
+            Prüfung
+        </h1>
+
+        <p id="pruefungBeschreibung"></p>
+
+        <div id="fragenContainer"></div>
+
+        <div class="actions">
+
+            <button
+                class="btn btnRed"
+                onclick="pruefungAbgeben()">
+
+                📨 Prüfung abgeben
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     ERGEBNIS
+===================================================== -->
+
+<section
+    id="seiteErgebnis"
+    class="page hidden">
+
+<div class="container">
+
+    <div
+        class="card resultCenter"
+        style="max-width:700px;margin:auto">
+
+        <div
+            id="resultCircle"
+            class="resultCircle">
+
             0%
+
         </div>
 
         <h1 id="ergebnisTitel">
@@ -773,12 +1117,16 @@ td{
 
         <div id="ergebnisDetails"></div>
 
-        <div class="actions"
-             style="justify-content:center">
+        <div
+            class="actions"
+            style="justify-content:center">
 
-            <button class="btn btnRed"
-                    onclick="zeigeStart()">
+            <button
+                class="btn btnRed"
+                onclick="zeigeStart()">
+
                 Zur Startseite
+
             </button>
 
         </div>
@@ -786,366 +1134,671 @@ td{
     </div>
 
 </div>
+
 </section>
 
 
-<!-- ADMIN LOGIN -->
+<!-- =====================================================
+     ADMIN LOGIN
+===================================================== -->
 
-<section id="seiteAdminLogin" class="page hidden">
+<section
+    id="seiteAdminLogin"
+    class="page hidden">
+
 <div class="container">
 
-    <div class="card"
-         style="max-width:500px;margin:70px auto">
+    <div
+        class="card"
+        style="max-width:500px;margin:70px auto">
 
-        <h1>🔐 Ausbilderbereich</h1>
+        <h1>
+            🔐 Ausbilderbereich
+        </h1>
 
         <p>
-            Melde dich mit deinem Ausbilderkonto an.
+            Anmeldung für Ausbilder.
         </p>
 
         <div id="loginFehler"></div>
 
+
         <div class="field">
-            <label>E-Mail</label>
-            <input id="adminEmail"
-                   type="email"
-                   placeholder="Ausbilder@beispiel.de">
+
+            <label>
+                E-Mail
+            </label>
+
+            <input
+                id="adminEmail"
+                type="email"
+                value="Ausbilder@gmail.com">
+
         </div>
+
 
         <br>
 
+
         <div class="field">
-            <label>Passwort</label>
-            <input id="adminPassword"
-                   type="password"
-                   placeholder="Passwort">
+
+            <label>
+                Passwort
+            </label>
+
+            <input
+                id="adminPassword"
+                type="password"
+                placeholder="Admin">
+
         </div>
 
+
         <div class="actions">
-            <button class="btn btnRed"
-                    onclick="adminLogin()">
+
+            <button
+                class="btn btnRed"
+                onclick="adminLogin()">
+
                 Anmelden
+
             </button>
 
-            <button class="btn btnGhost"
-                    onclick="zeigeStart()">
+            <button
+                class="btn btnGhost"
+                onclick="zeigeStart()">
+
                 Zurück
+
             </button>
+
         </div>
 
     </div>
 
 </div>
+
 </section>
 
 
-<!-- ADMIN -->
+<!-- =====================================================
+     ADMIN
+===================================================== -->
 
-<section id="seiteAdmin" class="page hidden">
+<section
+    id="seiteAdmin"
+    class="page hidden">
+
 <div class="container">
 
-    <div class="adminLayout">
+<div class="adminLayout">
 
-        <aside class="sidebar">
 
-            <button class="sideBtn active"
-                    onclick="adminSeite('dashboard',this)">
-                📊 Dashboard
+<aside class="sidebar">
+
+    <button
+        class="sideBtn active"
+        onclick="adminSeite('dashboard',this)">
+
+        📊 Dashboard
+
+    </button>
+
+
+    <button
+        class="sideBtn"
+        onclick="adminSeite('ki',this)">
+
+        🤖 KI-Prüfung
+
+    </button>
+
+
+    <button
+        class="sideBtn"
+        onclick="adminSeite('pruefungen',this)">
+
+        📝 Prüfungen
+
+    </button>
+
+
+    <button
+        class="sideBtn"
+        onclick="adminSeite('ergebnisse',this)">
+
+        📈 Ergebnisse
+
+    </button>
+
+
+    <button
+        class="sideBtn"
+        onclick="adminSeite('hilfe',this)">
+
+        ℹ️ Hilfe
+
+    </button>
+
+
+    <button
+        class="sideBtn"
+        onclick="adminLogout()">
+
+        🚪 Abmelden
+
+    </button>
+
+</aside>
+
+
+<main class="adminContent">
+
+
+<!-- DASHBOARD -->
+
+<div id="adminDashboard">
+
+    <h1>
+        Dashboard
+    </h1>
+
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div
+                class="statValue"
+                id="statPruefungen">
+
+                0
+
+            </div>
+
+            <div class="statLabel">
+                Prüfungen
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div
+                class="statValue"
+                id="statErgebnisse">
+
+                0
+
+            </div>
+
+            <div class="statLabel">
+                Ergebnisse
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div
+                class="statValue"
+                id="statBestanden">
+
+                0
+
+            </div>
+
+            <div class="statLabel">
+                Bestanden
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div
+                class="statValue"
+                id="statQuote">
+
+                0%
+
+            </div>
+
+            <div class="statLabel">
+                Bestehensquote
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Schnellstart
+        </h2>
+
+        <p>
+            Erstelle mit der Feuerwehr-KI
+            direkt eine neue Prüfung.
+        </p>
+
+        <div class="actions">
+
+            <button
+                class="btn btnRed"
+                onclick="adminSeite('ki')">
+
+                🤖 KI-Prüfung erstellen
+
             </button>
 
-            <button class="sideBtn"
-                    onclick="adminSeite('ki',this)">
-                🤖 KI-Prüfung
-            </button>
+            <button
+                class="btn"
+                onclick="adminSeite('pruefungen')">
 
-            <button class="sideBtn"
-                    onclick="adminSeite('pruefungen',this)">
                 📝 Prüfungen
+
             </button>
 
-            <button class="sideBtn"
-                    onclick="adminSeite('ergebnisse',this)">
-                📈 Ergebnisse
-            </button>
-
-            <button class="sideBtn"
-                    onclick="adminLogout()">
-                🚪 Abmelden
-            </button>
-
-        </aside>
-
-
-        <main class="adminContent">
-
-
-            <!-- DASHBOARD -->
-
-            <div id="adminDashboard">
-
-                <h1>Dashboard</h1>
-
-                <div class="stats">
-
-                    <div class="stat">
-                        <div class="statValue"
-                             id="statPruefungen">
-                            0
-                        </div>
-
-                        <div class="statLabel">
-                            Prüfungen
-                        </div>
-                    </div>
-
-                    <div class="stat">
-                        <div class="statValue"
-                             id="statErgebnisse">
-                            0
-                        </div>
-
-                        <div class="statLabel">
-                            Ergebnisse
-                        </div>
-                    </div>
-
-                    <div class="stat">
-                        <div class="statValue"
-                             id="statBestanden">
-                            0
-                        </div>
-
-                        <div class="statLabel">
-                            Bestanden
-                        </div>
-                    </div>
-
-                    <div class="stat">
-                        <div class="statValue"
-                             id="statQuote">
-                            0%
-                        </div>
-
-                        <div class="statLabel">
-                            Bestehensquote
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="card">
-
-                    <h2>Schnellstart</h2>
-
-                    <p>
-                        Erstelle eine neue Prüfung mit der
-                        Feuerwehr-KI oder öffne deine vorhandenen Prüfungen.
-                    </p>
-
-                    <div class="actions">
-
-                        <button class="btn btnRed"
-                                onclick="adminSeite('ki')">
-                            🤖 Prüfung mit KI erstellen
-                        </button>
-
-                        <button class="btn"
-                                onclick="adminSeite('pruefungen')">
-                            📝 Prüfungen anzeigen
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- KI -->
-
-            <div id="adminKI" class="hidden">
-
-                <div class="card aiBox">
-
-                    <div class="aiTitle">
-                        <span class="aiPulse"></span>
-                        Feuerwehr-KI
-                    </div>
-
-                    <p>
-                        Füge hier deinen Ausbildungsstoff ein.
-                        Die KI verwendet diesen Text als Grundlage
-                        für die Prüfung.
-                    </p>
-
-                    <div id="kiMeldung"></div>
-
-                    <div class="formGrid">
-
-                        <div class="field full">
-                            <label>
-                                Ausbildungsstoff
-                            </label>
-
-                            <textarea
-                                id="kiMaterial"
-                                placeholder="Beispiel:
-
-Atemschutzgeräteträger müssen vor dem Einsatz ihre persönliche Schutzausrüstung kontrollieren.
-Der Truppführer ist für die Führung des Trupps verantwortlich.
-Bei einem Innenangriff ist auf die Kommunikation und Atemschutzüberwachung zu achten."></textarea>
-                        </div>
-
-                        <div class="field">
-                            <label>Prüfungstitel</label>
-                            <input id="kiTitel"
-                                   value="Feuerwehr Prüfung">
-                        </div>
-
-                        <div class="field">
-                            <label>Fragenanzahl</label>
-
-                            <select id="kiFragen">
-                                <option value="5">5</option>
-                                <option value="10" selected>10</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="30">30</option>
-                            </select>
-                        </div>
-
-                        <div class="field">
-                            <label>Schwierigkeit</label>
-
-                            <select id="kiSchwierigkeit">
-                                <option value="leicht">
-                                    Leicht
-                                </option>
-
-                                <option value="mittel"
-                                        selected>
-                                    Mittel
-                                </option>
-
-                                <option value="schwer">
-                                    Schwer
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="field">
-                            <label>Prüfungszeit</label>
-
-                            <select id="kiZeit">
-                                <option value="15">15 Minuten</option>
-                                <option value="30" selected>
-                                    30 Minuten
-                                </option>
-                                <option value="45">45 Minuten</option>
-                                <option value="60">60 Minuten</option>
-                                <option value="90">90 Minuten</option>
-                            </select>
-                        </div>
-
-                        <div class="field">
-                            <label>Bestehensgrenze</label>
-
-                            <select id="kiBestehen">
-                                <option value="50">50%</option>
-                                <option value="60">60%</option>
-                                <option value="70" selected>
-                                    70%
-                                </option>
-                                <option value="75">75%</option>
-                                <option value="80">80%</option>
-                                <option value="90">90%</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <div class="actions">
-
-                        <button class="btn btnRed"
-                                id="kiButton"
-                                onclick="kiPruefungErstellen()">
-                            🤖 Prüfung mit KI erstellen
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- PRÜFUNGEN -->
-
-            <div id="adminPruefungen" class="hidden">
-
-                <div class="card">
-
-                    <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        gap:15px;
-                        flex-wrap:wrap;
-                    ">
-
-                        <div>
-                            <h1>📝 Prüfungen</h1>
-                            <p>
-                                Deine gespeicherten Prüfungen.
-                            </p>
-                        </div>
-
-                        <button class="btn btnRed"
-                                onclick="adminSeite('ki')">
-                            + Neue Prüfung
-                        </button>
-
-                    </div>
-
-                    <div id="pruefungenListe">
-                        Wird geladen...
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ERGEBNISSE -->
-
-            <div id="adminErgebnisse" class="hidden">
-
-                <div class="card">
-
-                    <h1>📈 Ergebnisse</h1>
-
-                    <p>
-                        Eingereichte Prüfungen und Ergebnisse.
-                    </p>
-
-                    <div id="ergebnisseListe">
-                        Wird geladen...
-                    </div>
-
-                </div>
-
-            </div>
-
-        </main>
+        </div>
 
     </div>
 
 </div>
+
+
+<!-- KI -->
+
+<div
+    id="adminKI"
+    class="hidden">
+
+<div class="card aiBox">
+
+    <div class="aiTitle">
+
+        <span class="aiPulse"></span>
+
+        Feuerwehr-KI
+
+    </div>
+
+
+    <p>
+        Ausbildungsstoff einfügen oder
+        eine Textdatei hochladen.
+        Die KI erstellt daraus die Prüfung.
+    </p>
+
+
+    <div id="kiMeldung"></div>
+
+
+    <div class="fileBox">
+
+        <strong>
+            📄 Ausbildungsstoff-Datei
+        </strong>
+
+        <p class="small">
+            Unterstützt werden TXT, MD, CSV und JSON.
+        </p>
+
+        <input
+            type="file"
+            id="materialDatei"
+            accept=".txt,.md,.csv,.json,text/plain"
+            onchange="dateiLaden()">
+
+    </div>
+
+
+    <br>
+
+
+    <div class="formGrid">
+
+        <div class="field full">
+
+            <label>
+                Ausbildungsstoff
+            </label>
+
+            <textarea
+                id="kiMaterial"
+                placeholder="Hier deinen Ausbildungsstoff einfügen..."></textarea>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Prüfungstitel
+            </label>
+
+            <input
+                id="kiTitel"
+                value="Feuerwehr Prüfung">
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Fragenanzahl
+            </label>
+
+            <select id="kiFragen">
+
+                <option value="5">
+                    5
+                </option>
+
+                <option
+                    value="10"
+                    selected>
+                    10
+                </option>
+
+                <option value="15">
+                    15
+                </option>
+
+                <option value="20">
+                    20
+                </option>
+
+                <option value="30">
+                    30
+                </option>
+
+                <option value="40">
+                    40
+                </option>
+
+                <option value="50">
+                    50
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Schwierigkeit
+            </label>
+
+            <select id="kiSchwierigkeit">
+
+                <option value="leicht">
+                    Leicht
+                </option>
+
+                <option
+                    value="mittel"
+                    selected>
+                    Mittel
+                </option>
+
+                <option value="schwer">
+                    Schwer
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Prüfungszeit
+            </label>
+
+            <select id="kiZeit">
+
+                <option value="15">
+                    15 Minuten
+                </option>
+
+                <option
+                    value="30"
+                    selected>
+                    30 Minuten
+                </option>
+
+                <option value="45">
+                    45 Minuten
+                </option>
+
+                <option value="60">
+                    60 Minuten
+                </option>
+
+                <option value="90">
+                    90 Minuten
+                </option>
+
+                <option value="120">
+                    120 Minuten
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Bestehensgrenze
+            </label>
+
+            <select id="kiBestehen">
+
+                <option value="50">
+                    50%
+                </option>
+
+                <option value="60">
+                    60%
+                </option>
+
+                <option
+                    value="70"
+                    selected>
+                    70%
+                </option>
+
+                <option value="75">
+                    75%
+                </option>
+
+                <option value="80">
+                    80%
+                </option>
+
+                <option value="90">
+                    90%
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="actions">
+
+        <button
+            id="kiButton"
+            class="btn btnRed"
+            onclick="kiPruefungErstellen()">
+
+            🤖 Prüfung mit KI erstellen
+
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- PRÜFUNGEN -->
+
+<div
+    id="adminPruefungen"
+    class="hidden">
+
+<div class="card">
+
+    <div
+        style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        flex-wrap:wrap;
+        gap:15px;
+        ">
+
+        <div>
+
+            <h1>
+                📝 Prüfungen
+            </h1>
+
+            <p>
+                Alle gespeicherten Prüfungen.
+            </p>
+
+        </div>
+
+
+        <button
+            class="btn btnRed"
+            onclick="adminSeite('ki')">
+
+            + Neue Prüfung
+
+        </button>
+
+    </div>
+
+
+    <div id="pruefungenListe">
+        Wird geladen...
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- ERGEBNISSE -->
+
+<div
+    id="adminErgebnisse"
+    class="hidden">
+
+<div class="card">
+
+    <h1>
+        📈 Ergebnisse
+    </h1>
+
+    <p>
+        Eingereichte Prüfungen.
+    </p>
+
+    <div id="ergebnisseListe">
+        Wird geladen...
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- HILFE -->
+
+<div
+    id="adminHilfe"
+    class="hidden">
+
+<div class="card">
+
+    <h1>
+        ℹ️ Hilfe
+    </h1>
+
+    <h3>
+        Ausbilder-Zugang
+    </h3>
+
+    <div class="notice">
+
+        <strong>E-Mail:</strong>
+        Ausbilder@gmail.com
+
+        <br><br>
+
+        <strong>Passwort:</strong>
+        Admin
+
+    </div>
+
+
+    <h3>
+        Prüfung erstellen
+    </h3>
+
+    <p>
+        Ausbildungsstoff einfügen, Einstellungen
+        auswählen und anschließend auf
+        „Prüfung mit KI erstellen“ klicken.
+    </p>
+
+
+    <h3>
+        Teilnehmer
+    </h3>
+
+    <p>
+        Der Teilnehmer benötigt nur den
+        generierten Prüfungscode.
+    </p>
+
+</div>
+
+</div>
+
+
+</main>
+
+</div>
+
+</div>
+
 </section>
 
 
 <footer class="footer">
-    Feuerwehr Prüfungsplattform · Digitale Ausbildung
+
+    Feuerwehr Prüfungsplattform
+
 </footer>
 
 
@@ -1153,7 +1806,7 @@ Bei einem Innenangriff ist auf die Kommunikation und Atemschutzüberwachung zu a
 
 /* =========================================================
    KONFIGURATION
-   ========================================================= */
+========================================================= */
 
 const API_URL =
     localStorage.getItem("FEUERWEHR_API") ||
@@ -1161,26 +1814,36 @@ const API_URL =
 
 
 /* =========================================================
-   GLOBALER ZUSTAND
-   ========================================================= */
+   ZUSTAND
+========================================================= */
 
 let aktuellePruefung = null;
+
 let aktuellerTeilnehmer = null;
+
 let timerInterval = null;
+
 let verbleibendeSekunden = 0;
 
 
 /* =========================================================
    SEITEN
-   ========================================================= */
+========================================================= */
 
 const seiten = [
+
     "seiteStart",
+
     "seiteTeilnehmer",
+
     "seitePruefung",
+
     "seiteErgebnis",
+
     "seiteAdminLogin",
+
     "seiteAdmin"
+
 ];
 
 
@@ -1188,7 +1851,8 @@ function versteckeAlleSeiten(){
 
     seiten.forEach(id => {
 
-        const el = document.getElementById(id);
+        const el =
+            document.getElementById(id);
 
         if(el){
             el.classList.add("hidden");
@@ -1208,6 +1872,7 @@ function zeigeStart(){
     document
         .getElementById("seiteStart")
         .classList.remove("hidden");
+
 }
 
 
@@ -1218,6 +1883,7 @@ function zeigeTeilnehmerStart(){
     document
         .getElementById("seiteTeilnehmer")
         .classList.remove("hidden");
+
 }
 
 
@@ -1228,52 +1894,59 @@ function zeigeAdminLogin(){
     document
         .getElementById("seiteAdminLogin")
         .classList.remove("hidden");
+
 }
 
 
 /* =========================================================
-   ADMIN
-   ========================================================= */
+   ADMIN SEITEN
+========================================================= */
 
 function adminSeite(name,button){
 
-    document
-        .getElementById("adminDashboard")
-        .classList.add("hidden");
-
-    document
-        .getElementById("adminKI")
-        .classList.add("hidden");
-
-    document
-        .getElementById("adminPruefungen")
-        .classList.add("hidden");
-
-    document
-        .getElementById("adminErgebnisse")
-        .classList.add("hidden");
-
-
-    const map = {
+    const bereiche = {
 
         dashboard:"adminDashboard",
+
         ki:"adminKI",
+
         pruefungen:"adminPruefungen",
-        ergebnisse:"adminErgebnisse"
+
+        ergebnisse:"adminErgebnisse",
+
+        hilfe:"adminHilfe"
 
     };
 
 
-    const ziel = document.getElementById(map[name]);
+    Object.values(bereiche)
+        .forEach(id => {
 
-    if(ziel){
-        ziel.classList.remove("hidden");
+            document
+                .getElementById(id)
+                .classList.add("hidden");
+
+        });
+
+
+    if(bereiche[name]){
+
+        document
+            .getElementById(
+                bereiche[name]
+            )
+            .classList.remove("hidden");
+
     }
 
 
     document
         .querySelectorAll(".sideBtn")
-        .forEach(btn => btn.classList.remove("active"));
+        .forEach(btn => {
+
+            btn.classList.remove("active");
+
+        });
 
 
     if(button){
@@ -1285,9 +1958,11 @@ function adminSeite(name,button){
         ladeDashboard();
     }
 
+
     if(name === "pruefungen"){
         ladePruefungen();
     }
+
 
     if(name === "ergebnisse"){
         ladeErgebnisse();
@@ -1296,17 +1971,28 @@ function adminSeite(name,button){
 }
 
 
+/* =========================================================
+   ADMIN LOGIN
+========================================================= */
+
 async function adminLogin(){
 
     const email =
-        document.getElementById("adminEmail").value.trim();
+        document
+            .getElementById("adminEmail")
+            .value
+            .trim();
+
 
     const password =
-        document.getElementById("adminPassword").value;
+        document
+            .getElementById("adminPassword")
+            .value;
 
 
     const fehler =
-        document.getElementById("loginFehler");
+        document
+            .getElementById("loginFehler");
 
 
     fehler.innerHTML = "";
@@ -1315,41 +2001,34 @@ async function adminLogin(){
     if(!email || !password){
 
         fehler.innerHTML =
-            '<div class="notice error">Bitte E-Mail und Passwort eingeben.</div>';
+            `
+            <div class="notice error">
+                Bitte E-Mail und Passwort eingeben.
+            </div>
+            `;
 
         return;
+
     }
 
 
     try{
 
-        const response = await fetch(
-            API_URL + "/api/admin/login",
-            {
-                method:"POST",
+        const data =
+            await api(
+                "/api/admin/login",
+                {
+                    method:"POST",
 
-                headers:{
-                    "Content-Type":"application/json"
-                },
+                    body:JSON.stringify({
 
-                body:JSON.stringify({
-                    email,
-                    password
-                })
-            }
-        );
+                        email,
 
+                        password
 
-        const data = await response.json();
-
-
-        if(!response.ok){
-
-            throw new Error(
-                data.error || "Anmeldung fehlgeschlagen."
+                    })
+                }
             );
-
-        }
 
 
         localStorage.setItem(
@@ -1359,6 +2038,7 @@ async function adminLogin(){
 
 
         versteckeAlleSeiten();
+
 
         document
             .getElementById("seiteAdmin")
@@ -1371,7 +2051,11 @@ async function adminLogin(){
     }catch(error){
 
         fehler.innerHTML =
-            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+            `
+            <div class="notice error">
+                ${escapeHtml(error.message)}
+            </div>
+            `;
 
     }
 
@@ -1380,42 +2064,73 @@ async function adminLogin(){
 
 function adminLogout(){
 
-    localStorage.removeItem("FW_ADMIN_TOKEN");
+    localStorage.removeItem(
+        "FW_ADMIN_TOKEN"
+    );
 
     zeigeStart();
 
 }
 
 
+/* =========================================================
+   ADMIN TOKEN
+========================================================= */
+
 function adminToken(){
 
-    return localStorage.getItem("FW_ADMIN_TOKEN") || "";
+    return localStorage.getItem(
+        "FW_ADMIN_TOKEN"
+    ) || "";
+
 }
 
 
 /* =========================================================
    DASHBOARD
-   ========================================================= */
+========================================================= */
 
 async function ladeDashboard(){
 
     try{
 
         const data =
-            await api("/api/admin/dashboard");
+            await api(
+                "/api/admin/dashboard"
+            );
 
 
-        document.getElementById("statPruefungen")
-            .textContent = data.pruefungen;
+        document
+            .getElementById(
+                "statPruefungen"
+            )
+            .textContent =
+            data.pruefungen;
 
-        document.getElementById("statErgebnisse")
-            .textContent = data.ergebnisse;
 
-        document.getElementById("statBestanden")
-            .textContent = data.bestanden;
+        document
+            .getElementById(
+                "statErgebnisse"
+            )
+            .textContent =
+            data.ergebnisse;
 
-        document.getElementById("statQuote")
-            .textContent = data.quote + "%";
+
+        document
+            .getElementById(
+                "statBestanden"
+            )
+            .textContent =
+            data.bestanden;
+
+
+        document
+            .getElementById(
+                "statQuote"
+            )
+            .textContent =
+            data.quote + "%";
+
 
     }catch(error){
 
@@ -1427,43 +2142,165 @@ async function ladeDashboard(){
 
 
 /* =========================================================
-   KI PRÜFUNG
-   ========================================================= */
+   DATEI LADEN
+========================================================= */
+
+function dateiLaden(){
+
+    const input =
+        document.getElementById(
+            "materialDatei"
+        );
+
+
+    if(!input.files.length){
+        return;
+    }
+
+
+    const file =
+        input.files[0];
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        function(){
+
+            document
+                .getElementById(
+                    "kiMaterial"
+                )
+                .value =
+                reader.result;
+
+
+            document
+                .getElementById(
+                    "kiMeldung"
+                )
+                .innerHTML =
+                `
+                <div class="notice success">
+                    Datei wurde geladen.
+                </div>
+                `;
+
+        };
+
+
+    reader.onerror =
+        function(){
+
+            document
+                .getElementById(
+                    "kiMeldung"
+                )
+                .innerHTML =
+                `
+                <div class="notice error">
+                    Datei konnte nicht gelesen werden.
+                </div>
+                `;
+
+        };
+
+
+    reader.readAsText(file);
+
+}
+
+
+/* =========================================================
+   KI
+========================================================= */
 
 async function kiPruefungErstellen(){
 
     const material =
-        document.getElementById("kiMaterial").value.trim();
+        document
+            .getElementById(
+                "kiMaterial"
+            )
+            .value
+            .trim();
+
 
     const titel =
-        document.getElementById("kiTitel").value.trim();
+        document
+            .getElementById(
+                "kiTitel"
+            )
+            .value
+            .trim();
+
 
     const fragen =
-        Number(document.getElementById("kiFragen").value);
+        Number(
+            document
+                .getElementById(
+                    "kiFragen"
+                )
+                .value
+        );
+
 
     const schwierigkeit =
-        document.getElementById("kiSchwierigkeit").value;
+        document
+            .getElementById(
+                "kiSchwierigkeit"
+            )
+            .value;
+
 
     const zeit =
-        Number(document.getElementById("kiZeit").value);
+        Number(
+            document
+                .getElementById(
+                    "kiZeit"
+                )
+                .value
+        );
+
 
     const bestehen =
-        Number(document.getElementById("kiBestehen").value);
+        Number(
+            document
+                .getElementById(
+                    "kiBestehen"
+                )
+                .value
+        );
 
 
     const meldung =
-        document.getElementById("kiMeldung");
+        document
+            .getElementById(
+                "kiMeldung"
+            );
+
 
     const button =
-        document.getElementById("kiButton");
+        document
+            .getElementById(
+                "kiButton"
+            );
 
 
     if(material.length < 50){
 
         meldung.innerHTML =
-            '<div class="notice error">Bitte gib ausreichend Ausbildungsstoff ein.</div>';
+            `
+            <div class="notice error">
+                Bitte mindestens 50 Zeichen
+                Ausbildungsstoff eingeben.
+            </div>
+            `;
 
         return;
+
     }
 
 
@@ -1474,7 +2311,12 @@ async function kiPruefungErstellen(){
 
 
     meldung.innerHTML =
-        '<div class="notice">Die Feuerwehr-KI erstellt gerade die Prüfung. Bitte warten...</div>';
+        `
+        <div class="notice">
+            Die Feuerwehr-KI erstellt gerade
+            die Prüfung...
+        </div>
+        `;
 
 
     try{
@@ -1488,10 +2330,15 @@ async function kiPruefungErstellen(){
                     body:JSON.stringify({
 
                         material,
+
                         titel,
+
                         fragen,
+
                         schwierigkeit,
+
                         zeit,
+
                         bestehen
 
                     })
@@ -1499,22 +2346,86 @@ async function kiPruefungErstellen(){
             );
 
 
+        const p =
+            data.pruefung;
+
+
+        const link =
+            location.origin +
+            location.pathname +
+            "?pruefung=" +
+            encodeURIComponent(
+                p.code
+            );
+
+
         meldung.innerHTML =
-            `<div class="notice success">
-                Prüfung <strong>${escapeHtml(data.pruefung.titel)}</strong>
-                wurde erfolgreich erstellt.<br>
+            `
+            <div class="notice success">
+
+                <strong>
+                    Prüfung erfolgreich erstellt!
+                </strong>
+
+                <br><br>
+
+                Prüfung:
+                ${escapeHtml(p.titel)}
+
+                <br><br>
+
                 Prüfungscode:
-                <strong>${escapeHtml(data.pruefung.code)}</strong>
-            </div>`;
+                <strong>
+                    ${escapeHtml(p.code)}
+                </strong>
+
+                <br><br>
+
+                Prüfungslink:
+
+                <div class="linkBox">
+                    ${escapeHtml(link)}
+                </div>
+
+                <div class="actions">
+
+                    <button
+                        class="btn btnBlue"
+                        onclick='kopiereLink(${JSON.stringify(link)})'>
+
+                        🔗 Link kopieren
+
+                    </button>
+
+                    <button
+                        class="btn"
+                        onclick='kopiereLink(${JSON.stringify(p.code)})'>
+
+                        Code kopieren
+
+                    </button>
+
+                </div>
+
+            </div>
+            `;
 
 
-        document.getElementById("kiMaterial").value = "";
+        document
+            .getElementById(
+                "kiMaterial"
+            )
+            .value = "";
 
 
     }catch(error){
 
         meldung.innerHTML =
-            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+            `
+            <div class="notice error">
+                ${escapeHtml(error.message)}
+            </div>
+            `;
 
     }finally{
 
@@ -1529,13 +2440,16 @@ async function kiPruefungErstellen(){
 
 
 /* =========================================================
-   PRÜFUNGEN LADEN
-   ========================================================= */
+   PRÜFUNGEN
+========================================================= */
 
 async function ladePruefungen(){
 
     const container =
-        document.getElementById("pruefungenListe");
+        document
+            .getElementById(
+                "pruefungenListe"
+            );
 
 
     container.innerHTML =
@@ -1545,32 +2459,69 @@ async function ladePruefungen(){
     try{
 
         const data =
-            await api("/api/admin/pruefungen");
+            await api(
+                "/api/admin/pruefungen"
+            );
 
 
         if(!data.pruefungen.length){
 
             container.innerHTML =
-                '<div class="notice">Noch keine Prüfungen vorhanden.</div>';
+                `
+                <div class="notice">
+                    Noch keine Prüfungen vorhanden.
+                </div>
+                `;
 
             return;
+
         }
 
 
         let html = `
-            <div class="tableWrap">
-            <table>
-            <thead>
-            <tr>
-                <th>Titel</th>
-                <th>Code</th>
-                <th>Fragen</th>
-                <th>Zeit</th>
-                <th>Erstellt</th>
-                <th>Link</th>
-            </tr>
-            </thead>
-            <tbody>
+
+        <div class="tableWrap">
+
+        <table>
+
+        <thead>
+
+        <tr>
+
+            <th>
+                Prüfung
+            </th>
+
+            <th>
+                Code
+            </th>
+
+            <th>
+                Fragen
+            </th>
+
+            <th>
+                Zeit
+            </th>
+
+            <th>
+                Bestehen
+            </th>
+
+            <th>
+                Erstellt
+            </th>
+
+            <th>
+                Link
+            </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
         `;
 
 
@@ -1580,63 +2531,87 @@ async function ladePruefungen(){
                 location.origin +
                 location.pathname +
                 "?pruefung=" +
-                encodeURIComponent(p.code);
+                encodeURIComponent(
+                    p.code
+                );
 
 
             html += `
-                <tr>
 
-                    <td>
-                        <strong>
-                            ${escapeHtml(p.titel)}
-                        </strong>
-                    </td>
+            <tr>
 
-                    <td>
-                        <span class="badge red">
-                            ${escapeHtml(p.code)}
-                        </span>
-                    </td>
+                <td>
+                    <strong>
+                        ${escapeHtml(p.titel)}
+                    </strong>
+                </td>
 
-                    <td>
-                        ${p.fragen.length}
-                    </td>
+                <td>
 
-                    <td>
-                        ${p.zeit} Min.
-                    </td>
+                    <span class="badge red">
+                        ${escapeHtml(p.code)}
+                    </span>
 
-                    <td>
-                        ${formatDatum(p.createdAt)}
-                    </td>
+                </td>
 
-                    <td>
-                        <button class="btn btnBlue"
-                            onclick='kopiereLink(${JSON.stringify(link)})'>
-                            🔗 Kopieren
-                        </button>
-                    </td>
+                <td>
+                    ${p.fragen.length}
+                </td>
 
-                </tr>
+                <td>
+                    ${p.zeit} Min.
+                </td>
+
+                <td>
+                    ${p.bestehensgrenze}%
+                </td>
+
+                <td>
+                    ${formatDatum(p.createdAt)}
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn btnBlue"
+                        onclick='kopiereLink(${JSON.stringify(link)})'>
+
+                        🔗 Kopieren
+
+                    </button>
+
+                </td>
+
+            </tr>
+
             `;
 
         });
 
 
         html += `
-            </tbody>
-            </table>
-            </div>
+
+        </tbody>
+
+        </table>
+
+        </div>
+
         `;
 
 
-        container.innerHTML = html;
+        container.innerHTML =
+            html;
 
 
     }catch(error){
 
         container.innerHTML =
-            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+            `
+            <div class="notice error">
+                ${escapeHtml(error.message)}
+            </div>
+            `;
 
     }
 
@@ -1645,12 +2620,15 @@ async function ladePruefungen(){
 
 /* =========================================================
    ERGEBNISSE
-   ========================================================= */
+========================================================= */
 
 async function ladeErgebnisse(){
 
     const container =
-        document.getElementById("ergebnisseListe");
+        document
+            .getElementById(
+                "ergebnisseListe"
+            );
 
 
     container.innerHTML =
@@ -1660,93 +2638,153 @@ async function ladeErgebnisse(){
     try{
 
         const data =
-            await api("/api/admin/ergebnisse");
+            await api(
+                "/api/admin/ergebnisse"
+            );
 
 
         if(!data.ergebnisse.length){
 
             container.innerHTML =
-                '<div class="notice">Noch keine Ergebnisse vorhanden.</div>';
+                `
+                <div class="notice">
+                    Noch keine Ergebnisse vorhanden.
+                </div>
+                `;
 
             return;
+
         }
 
 
         let html = `
-            <div class="tableWrap">
-            <table>
-            <thead>
-            <tr>
-                <th>Teilnehmer</th>
-                <th>Feuerwehr</th>
-                <th>Prüfung</th>
-                <th>Ergebnis</th>
-                <th>Status</th>
-                <th>Datum</th>
-            </tr>
-            </thead>
-            <tbody>
+
+        <div class="tableWrap">
+
+        <table>
+
+        <thead>
+
+        <tr>
+
+            <th>
+                Teilnehmer
+            </th>
+
+            <th>
+                Feuerwehr
+            </th>
+
+            <th>
+                Prüfung
+            </th>
+
+            <th>
+                Punkte
+            </th>
+
+            <th>
+                Prozent
+            </th>
+
+            <th>
+                Status
+            </th>
+
+            <th>
+                Datum
+            </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
         `;
 
 
         data.ergebnisse.forEach(r => {
 
             html += `
-                <tr>
 
-                    <td>
-                        ${escapeHtml(r.vorname)}
-                        ${escapeHtml(r.nachname)}
-                    </td>
+            <tr>
 
-                    <td>
-                        ${escapeHtml(r.feuerwehr)}
-                    </td>
+                <td>
+                    ${escapeHtml(r.vorname)}
+                    ${escapeHtml(r.nachname)}
+                </td>
 
-                    <td>
-                        ${escapeHtml(r.pruefungTitel)}
-                    </td>
+                <td>
+                    ${escapeHtml(r.feuerwehr)}
+                </td>
 
-                    <td>
-                        ${r.prozent}%
-                    </td>
+                <td>
+                    ${escapeHtml(r.pruefungTitel)}
+                </td>
 
-                    <td>
+                <td>
+                    ${r.punkte}/${r.maxPunkte}
+                </td>
 
-                        ${
-                            r.bestanden
-                            ?
-                            '<span class="badge green">BESTANDEN</span>'
-                            :
-                            '<span class="badge red">NICHT BESTANDEN</span>'
-                        }
+                <td>
+                    ${r.prozent}%
+                </td>
 
-                    </td>
+                <td>
 
-                    <td>
-                        ${formatDatum(r.createdAt)}
-                    </td>
+                    ${
+                        r.bestanden
 
-                </tr>
+                        ?
+
+                        `<span class="badge green">
+                            BESTANDEN
+                        </span>`
+
+                        :
+
+                        `<span class="badge red">
+                            NICHT BESTANDEN
+                        </span>`
+                    }
+
+                </td>
+
+                <td>
+                    ${formatDatum(r.createdAt)}
+                </td>
+
+            </tr>
+
             `;
 
         });
 
 
         html += `
-            </tbody>
-            </table>
-            </div>
+
+        </tbody>
+
+        </table>
+
+        </div>
+
         `;
 
 
-        container.innerHTML = html;
+        container.innerHTML =
+            html;
 
 
     }catch(error){
 
         container.innerHTML =
-            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+            `
+            <div class="notice error">
+                ${escapeHtml(error.message)}
+            </div>
+            `;
 
     }
 
@@ -1754,37 +2792,74 @@ async function ladeErgebnisse(){
 
 
 /* =========================================================
-   PRÜFUNG STARTEN
-   ========================================================= */
+   TEILNEHMER
+========================================================= */
 
 async function startePruefung(){
 
     const vorname =
-        document.getElementById("teilnehmerVorname").value.trim();
+        document
+            .getElementById(
+                "teilnehmerVorname"
+            )
+            .value
+            .trim();
+
 
     const nachname =
-        document.getElementById("teilnehmerNachname").value.trim();
+        document
+            .getElementById(
+                "teilnehmerNachname"
+            )
+            .value
+            .trim();
+
 
     const feuerwehr =
-        document.getElementById("teilnehmerFeuerwehr").value.trim();
+        document
+            .getElementById(
+                "teilnehmerFeuerwehr"
+            )
+            .value
+            .trim();
+
 
     const code =
-        document.getElementById("teilnehmerCode").value.trim().toUpperCase();
+        document
+            .getElementById(
+                "teilnehmerCode"
+            )
+            .value
+            .trim()
+            .toUpperCase();
 
 
     const fehler =
-        document.getElementById("teilnehmerFehler");
+        document
+            .getElementById(
+                "teilnehmerFehler"
+            );
 
 
     fehler.innerHTML = "";
 
 
-    if(!vorname || !nachname || !feuerwehr || !code){
+    if(
+        !vorname ||
+        !nachname ||
+        !feuerwehr ||
+        !code
+    ){
 
         fehler.innerHTML =
-            '<div class="notice error">Bitte alle Felder ausfüllen.</div>';
+            `
+            <div class="notice error">
+                Bitte alle Felder ausfüllen.
+            </div>
+            `;
 
         return;
+
     }
 
 
@@ -1793,7 +2868,9 @@ async function startePruefung(){
         const data =
             await api(
                 "/api/pruefungen/code/" +
-                encodeURIComponent(code)
+                encodeURIComponent(
+                    code
+                )
             );
 
 
@@ -1804,7 +2881,9 @@ async function startePruefung(){
         aktuellerTeilnehmer = {
 
             vorname,
+
             nachname,
+
             feuerwehr
 
         };
@@ -1816,7 +2895,11 @@ async function startePruefung(){
     }catch(error){
 
         fehler.innerHTML =
-            `<div class="notice error">${escapeHtml(error.message)}</div>`;
+            `
+            <div class="notice error">
+                ${escapeHtml(error.message)}
+            </div>
+            `;
 
     }
 
@@ -1824,89 +2907,119 @@ async function startePruefung(){
 
 
 /* =========================================================
-   PRÜFUNG ANZEIGEN
-   ========================================================= */
+   PRÜFUNG
+========================================================= */
 
 function zeigePruefung(){
 
     versteckeAlleSeiten();
 
+
     document
-        .getElementById("seitePruefung")
+        .getElementById(
+            "seitePruefung"
+        )
         .classList.remove("hidden");
 
 
-    document.getElementById("pruefungTitel")
+    document
+        .getElementById(
+            "pruefungTitel"
+        )
         .textContent =
         aktuellePruefung.titel;
 
 
-    document.getElementById("pruefungTitelTop")
+    document
+        .getElementById(
+            "pruefungTitelTop"
+        )
         .textContent =
         aktuellePruefung.titel;
 
 
-    document.getElementById("pruefungTeilnehmerTop")
+    document
+        .getElementById(
+            "pruefungTeilnehmerTop"
+        )
         .textContent =
         aktuellerTeilnehmer.vorname +
         " " +
         aktuellerTeilnehmer.nachname;
 
 
-    document.getElementById("pruefungBeschreibung")
+    document
+        .getElementById(
+            "pruefungBeschreibung"
+        )
         .textContent =
-        aktuellePruefung.beschreibung ||
-        "Beantworte alle Fragen."
+        aktuellePruefung.beschreibung;
 
 
     const container =
-        document.getElementById("fragenContainer");
+        document
+            .getElementById(
+                "fragenContainer"
+            );
 
 
     container.innerHTML = "";
 
 
-    aktuellePruefung.fragen.forEach(
-        (frage,index) => {
+    aktuellePruefung.fragen
+        .forEach(
+            (frage,index) => {
 
-            const box =
-                document.createElement("div");
-
-            box.className =
-                "card question";
-
-
-            let antwortHTML = "";
+                const box =
+                    document.createElement(
+                        "div"
+                    );
 
 
-            if(frage.typ === "multiple"){
-
-                antwortHTML =
-                    frage.optionen.map(
-                        (option,optionIndex) => `
-
-                        <label class="option">
-
-                            <input
-                                type="radio"
-                                name="frage_${index}"
-                                value="${optionIndex}">
-
-                            <span>
-                                ${escapeHtml(option)}
-                            </span>
-
-                        </label>
-
-                    `
-                    ).join("");
-
-            }
+                box.className =
+                    "card question";
 
 
-            else if(frage.typ === "truefalse"){
+                let antwortHTML =
+                    "";
 
-                antwortHTML = `
+
+                if(
+                    frage.typ ===
+                    "multiple"
+                ){
+
+                    antwortHTML =
+                        frage.optionen
+                            .map(
+                                (option,i) => `
+
+                                <label class="option">
+
+                                    <input
+                                        type="radio"
+                                        name="frage_${index}"
+                                        value="${i}">
+
+                                    <span>
+                                        ${escapeHtml(option)}
+                                    </span>
+
+                                </label>
+
+                                `
+                            )
+                            .join("");
+
+                }
+
+
+                else if(
+                    frage.typ ===
+                    "truefalse"
+                ){
+
+                    antwortHTML = `
 
                     <label class="option">
 
@@ -1915,9 +3028,12 @@ function zeigePruefung(){
                             name="frage_${index}"
                             value="true">
 
-                        <span>Richtig</span>
+                        <span>
+                            Richtig
+                        </span>
 
                     </label>
+
 
                     <label class="option">
 
@@ -1926,48 +3042,58 @@ function zeigePruefung(){
                             name="frage_${index}"
                             value="false">
 
-                        <span>Falsch</span>
+                        <span>
+                            Falsch
+                        </span>
 
                     </label>
 
-                `;
+                    `;
 
-            }
+                }
 
 
-            else{
+                else{
 
-                antwortHTML = `
+                    antwortHTML = `
 
                     <textarea
                         id="textantwort_${index}"
                         placeholder="Deine Antwort..."></textarea>
 
+                    `;
+
+                }
+
+
+                box.innerHTML = `
+
+                    <div class="questionTitle">
+
+                        ${index + 1}.
+                        ${escapeHtml(
+                            frage.frage
+                        )}
+
+                    </div>
+
+                    ${antwortHTML}
+
                 `;
 
+
+                container.appendChild(
+                    box
+                );
+
             }
-
-
-            box.innerHTML = `
-
-                <div class="questionTitle">
-                    ${index + 1}.
-                    ${escapeHtml(frage.frage)}
-                </div>
-
-                ${antwortHTML}
-
-            `;
-
-
-            container.appendChild(box);
-
-        }
-    );
+        );
 
 
     starteTimer(
-        Number(aktuellePruefung.zeit) * 60
+        Number(
+            aktuellePruefung.zeit
+        ) * 60
     );
 
 }
@@ -1975,11 +3101,12 @@ function zeigePruefung(){
 
 /* =========================================================
    TIMER
-   ========================================================= */
+========================================================= */
 
 function starteTimer(sekunden){
 
     stoppeTimer();
+
 
     verbleibendeSekunden =
         sekunden;
@@ -1989,26 +3116,34 @@ function starteTimer(sekunden){
 
 
     timerInterval =
-        setInterval(() => {
+        setInterval(
+            () => {
 
-            verbleibendeSekunden--;
-
-            aktualisiereTimer();
+                verbleibendeSekunden--;
 
 
-            if(verbleibendeSekunden <= 0){
+                aktualisiereTimer();
 
-                stoppeTimer();
 
-                alert(
-                    "Die Prüfungszeit ist abgelaufen. Die Prüfung wird abgegeben."
-                );
+                if(
+                    verbleibendeSekunden <= 0
+                ){
 
-                pruefungAbgeben();
+                    stoppeTimer();
 
-            }
 
-        },1000);
+                    alert(
+                        "Die Prüfungszeit ist abgelaufen."
+                    );
+
+
+                    pruefungAbgeben();
+
+                }
+
+            },
+            1000
+        );
 
 }
 
@@ -2016,17 +3151,29 @@ function starteTimer(sekunden){
 function aktualisiereTimer(){
 
     const minuten =
-        Math.floor(verbleibendeSekunden / 60);
+        Math.floor(
+            verbleibendeSekunden /
+            60
+        );
+
 
     const sekunden =
-        verbleibendeSekunden % 60;
+        verbleibendeSekunden %
+        60;
 
 
-    document.getElementById("timer")
+    document
+        .getElementById(
+            "timer"
+        )
         .textContent =
-        String(minuten).padStart(2,"0") +
+        String(
+            minuten
+        ).padStart(2,"0") +
         ":" +
-        String(sekunden).padStart(2,"0");
+        String(
+            sekunden
+        ).padStart(2,"0");
 
 }
 
@@ -2035,7 +3182,9 @@ function stoppeTimer(){
 
     if(timerInterval){
 
-        clearInterval(timerInterval);
+        clearInterval(
+            timerInterval
+        );
 
         timerInterval = null;
 
@@ -2045,8 +3194,8 @@ function stoppeTimer(){
 
 
 /* =========================================================
-   PRÜFUNG ABGEBEN
-   ========================================================= */
+   ABGABE
+========================================================= */
 
 async function pruefungAbgeben(){
 
@@ -2061,39 +3210,53 @@ async function pruefungAbgeben(){
     const antworten = [];
 
 
-    aktuellePruefung.fragen.forEach(
-        (frage,index) => {
+    aktuellePruefung.fragen
+        .forEach(
+            (frage,index) => {
 
-            let antwort = "";
+                let antwort = "";
 
 
-            if(frage.typ === "text"){
+                if(
+                    frage.typ ===
+                    "text"
+                ){
 
-                const el =
-                    document.getElementById(
-                        "textantwort_" + index
-                    );
+                    const el =
+                        document
+                            .getElementById(
+                                "textantwort_" +
+                                index
+                            );
 
-                antwort =
-                    el ? el.value.trim() : "";
 
-            }else{
+                    antwort =
+                        el
+                        ? el.value.trim()
+                        : "";
 
-                const checked =
-                    document.querySelector(
-                        `input[name="frage_${index}"]:checked`
-                    );
+                }else{
 
-                antwort =
-                    checked ? checked.value : "";
+                    const checked =
+                        document.querySelector(
+                            `input[name="frage_${index}"]:checked`
+                        );
+
+
+                    antwort =
+                        checked
+                        ? checked.value
+                        : "";
+
+                }
+
+
+                antworten.push(
+                    antwort
+                );
 
             }
-
-
-            antworten.push(antwort);
-
-        }
-    );
+        );
 
 
     try{
@@ -2125,7 +3288,9 @@ async function pruefungAbgeben(){
             );
 
 
-        zeigeErgebnis(data.ergebnis);
+        zeigeErgebnis(
+            data.ergebnis
+        );
 
 
     }catch(error){
@@ -2142,60 +3307,82 @@ async function pruefungAbgeben(){
 
 /* =========================================================
    ERGEBNIS
-   ========================================================= */
+========================================================= */
 
 function zeigeErgebnis(ergebnis){
 
     versteckeAlleSeiten();
 
+
     document
-        .getElementById("seiteErgebnis")
+        .getElementById(
+            "seiteErgebnis"
+        )
         .classList.remove("hidden");
 
 
-    const circle =
-        document.getElementById("resultCircle");
+    document
+        .getElementById(
+            "resultCircle"
+        )
+        .textContent =
+        ergebnis.prozent +
+        "%";
 
 
-    circle.textContent =
-        ergebnis.prozent + "%";
-
-
-    document.getElementById("ergebnisTitel")
+    document
+        .getElementById(
+            "ergebnisTitel"
+        )
         .textContent =
         ergebnis.bestanden
         ? "🎉 Prüfung bestanden!"
         : "❌ Prüfung nicht bestanden";
 
 
-    document.getElementById("ergebnisText")
+    document
+        .getElementById(
+            "ergebnisText"
+        )
         .textContent =
         ergebnis.bestanden
-        ? "Herzlichen Glückwunsch! Die erforderliche Punktzahl wurde erreicht."
-        : "Die erforderliche Punktzahl wurde leider nicht erreicht.";
+        ? "Herzlichen Glückwunsch! Die Bestehensgrenze wurde erreicht."
+        : "Die Bestehensgrenze wurde nicht erreicht.";
 
 
-    document.getElementById("ergebnisDetails")
+    document
+        .getElementById(
+            "ergebnisDetails"
+        )
         .innerHTML = `
 
-            <div class="notice">
+        <div class="notice">
 
-                <strong>Punkte:</strong>
-                ${ergebnis.punkte}
-                /
-                ${ergebnis.maxPunkte}
+            <strong>
+                Punkte:
+            </strong>
 
-                <br><br>
+            ${ergebnis.punkte}
+            /
+            ${ergebnis.maxPunkte}
 
-                <strong>Ergebnis:</strong>
-                ${ergebnis.prozent}%
+            <br><br>
 
-                <br><br>
+            <strong>
+                Ergebnis:
+            </strong>
 
-                <strong>Bestehensgrenze:</strong>
-                ${ergebnis.bestehensgrenze}%
+            ${ergebnis.prozent}%
 
-            </div>
+            <br><br>
+
+            <strong>
+                Bestehensgrenze:
+            </strong>
+
+            ${ergebnis.bestehensgrenze}%
+
+        </div>
 
         `;
 
@@ -2204,9 +3391,12 @@ function zeigeErgebnis(ergebnis){
 
 /* =========================================================
    API
-   ========================================================= */
+========================================================= */
 
-async function api(path,options={}){
+async function api(
+    path,
+    options={}
+){
 
     const headers =
         options.headers || {};
@@ -2223,7 +3413,8 @@ async function api(path,options={}){
     if(token){
 
         headers["Authorization"] =
-            "Bearer " + token;
+            "Bearer " +
+            token;
 
     }
 
@@ -2257,9 +3448,8 @@ async function api(path,options={}){
 
         throw new Error(
             data.error ||
-            "Serverfehler (" +
-            response.status +
-            ")"
+            "Serverfehler " +
+            response.status
         );
 
     }
@@ -2271,23 +3461,27 @@ async function api(path,options={}){
 
 
 /* =========================================================
-   LINK
-   ========================================================= */
+   LINK KOPIEREN
+========================================================= */
 
 async function kopiereLink(link){
 
     try{
 
-        await navigator.clipboard.writeText(link);
+        await navigator
+            .clipboard
+            .writeText(link);
+
 
         alert(
-            "Prüfungslink wurde kopiert."
+            "Kopiert."
         );
+
 
     }catch{
 
         prompt(
-            "Prüfungslink:",
+            "Hier ist der Link:",
             link
         );
 
@@ -2298,16 +3492,33 @@ async function kopiereLink(link){
 
 /* =========================================================
    HILFSFUNKTIONEN
-   ========================================================= */
+========================================================= */
 
 function escapeHtml(value){
 
-    return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    return String(
+        value ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
 
 }
 
@@ -2318,17 +3529,21 @@ function formatDatum(value){
         return "-";
     }
 
-    return new Date(value)
-        .toLocaleString("de-DE");
+
+    return new Date(
+        value
+    ).toLocaleString(
+        "de-DE"
+    );
 
 }
 
 
 /* =========================================================
-   URL PRÜFUNGSCODE
-   ========================================================= */
+   PRÜFUNG AUS URL
+========================================================= */
 
-async function pruefeURLCode(){
+function pruefeURLCode(){
 
     const params =
         new URLSearchParams(
@@ -2337,7 +3552,9 @@ async function pruefeURLCode(){
 
 
     const code =
-        params.get("pruefung");
+        params.get(
+            "pruefung"
+        );
 
 
     if(!code){
@@ -2348,9 +3565,11 @@ async function pruefeURLCode(){
     zeigeTeilnehmerStart();
 
 
-    document.getElementById(
-        "teilnehmerCode"
-    ).value =
+    document
+        .getElementById(
+            "teilnehmerCode"
+        )
+        .value =
         code.toUpperCase();
 
 }
@@ -2358,7 +3577,7 @@ async function pruefeURLCode(){
 
 /* =========================================================
    START
-   ========================================================= */
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
