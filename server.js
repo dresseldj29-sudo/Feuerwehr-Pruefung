@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 
 /* =========================================================
    GRUNDKONFIGURATION
-   ========================================================= */
+========================================================= */
 
 const __filename =
     fileURLToPath(import.meta.url);
@@ -23,26 +23,33 @@ const app =
 
 
 const PORT =
-    Number(process.env.PORT || 3000);
-
-
-/*
-   DEINE WEBSITE
-
-   Beispiel:
-
-   https://dresseldj29-sudo.github.io/Feuerwehr-Pruefung/
-
-   Wenn du lokal testest, kannst du "*" verwenden.
-*/
-
-const FRONTEND_URL =
-    process.env.FRONTEND_URL || "*";
+    Number(
+        process.env.PORT || 3000
+    );
 
 
 /* =========================================================
-   ADMIN
-   ========================================================= */
+   FRONTEND
+========================================================= */
+
+const FRONTEND_URL =
+    process.env.FRONTEND_URL ||
+    "*";
+
+
+/* =========================================================
+   AUSbilder LOGIN
+========================================================= */
+
+/*
+   GENAU DIE GEWÜNSCHTEN DATEN
+
+   E-Mail:
+   Ausbilder@gmail.com
+
+   Passwort:
+   Admin
+*/
 
 const ADMIN_EMAIL =
     process.env.ADMIN_EMAIL ||
@@ -56,10 +63,11 @@ const ADMIN_PASSWORD =
 
 /* =========================================================
    OPENAI
-   ========================================================= */
+========================================================= */
 
 const OPENAI_API_KEY =
-    process.env.OPENAI_API_KEY;
+    process.env.OPENAI_API_KEY ||
+    "";
 
 
 const OPENAI_MODEL =
@@ -74,7 +82,8 @@ if(OPENAI_API_KEY){
 
     openai =
         new OpenAI({
-            apiKey:OPENAI_API_KEY
+            apiKey:
+                OPENAI_API_KEY
         });
 
 }
@@ -82,28 +91,33 @@ if(OPENAI_API_KEY){
 
 /* =========================================================
    EXPRESS
-   ========================================================= */
+========================================================= */
 
 app.use(
     cors({
-        origin: FRONTEND_URL === "*"
+        origin:
+            FRONTEND_URL === "*"
             ? true
-            : FRONTEND_URL.split(",")
-                .map(x => x.trim())
+            : FRONTEND_URL
+                .split(",")
+                .map(
+                    x =>
+                        x.trim()
+                )
     })
 );
 
 
 app.use(
     express.json({
-        limit:"10mb"
+        limit:"15mb"
     })
 );
 
 
 /* =========================================================
    DATENBANK
-   ========================================================= */
+========================================================= */
 
 const DATA_FILE =
     path.join(
@@ -112,7 +126,7 @@ const DATA_FILE =
     );
 
 
-function defaultData(){
+function neueDatenbank(){
 
     return {
 
@@ -127,63 +141,70 @@ function defaultData(){
 
 function ladeDaten(){
 
-    try{
-
-        if(!fs.existsSync(DATA_FILE)){
-
-            const daten =
-                defaultData();
-
-            fs.writeFileSync(
-                DATA_FILE,
-                JSON.stringify(
-                    daten,
-                    null,
-                    2
-                ),
-                "utf8"
-            );
-
-            return daten;
-
-        }
-
-
-        const text =
-            fs.readFileSync(
-                DATA_FILE,
-                "utf8"
-            );
-
+    if(
+        !fs.existsSync(
+            DATA_FILE
+        )
+    ){
 
         const daten =
-            JSON.parse(text);
+            neueDatenbank();
+
+
+        fs.writeFileSync(
+            DATA_FILE,
+            JSON.stringify(
+                daten,
+                null,
+                2
+            ),
+            "utf8"
+        );
+
+
+        return daten;
+
+    }
+
+
+    try{
+
+        const daten =
+            JSON.parse(
+                fs.readFileSync(
+                    DATA_FILE,
+                    "utf8"
+                )
+            );
 
 
         return {
 
             pruefungen:
-                Array.isArray(daten.pruefungen)
+                Array.isArray(
+                    daten.pruefungen
+                )
                 ? daten.pruefungen
                 : [],
 
             ergebnisse:
-                Array.isArray(daten.ergebnisse)
+                Array.isArray(
+                    daten.ergebnisse
+                )
                 ? daten.ergebnisse
                 : []
 
         };
 
-
     }catch(error){
 
         console.error(
-            "Datenbank konnte nicht geladen werden:",
+            "Fehler beim Lesen der Daten:",
             error
         );
 
 
-        return defaultData();
+        return neueDatenbank();
 
     }
 
@@ -196,12 +217,8 @@ let daten =
 
 function speichereDaten(){
 
-    const tempFile =
-        DATA_FILE + ".tmp";
-
-
     fs.writeFileSync(
-        tempFile,
+        DATA_FILE,
         JSON.stringify(
             daten,
             null,
@@ -210,24 +227,18 @@ function speichereDaten(){
         "utf8"
     );
 
-
-    fs.renameSync(
-        tempFile,
-        DATA_FILE
-    );
-
 }
 
 
 /* =========================================================
-   AUTHENTIFIZIERUNG
-   ========================================================= */
+   ADMIN SESSIONS
+========================================================= */
 
-const adminSessions =
+const sessions =
     new Map();
 
 
-function erstelleToken(){
+function neuesToken(){
 
     return crypto
         .randomBytes(32)
@@ -242,25 +253,29 @@ function adminErforderlich(
     next
 ){
 
-    const header =
-        req.headers.authorization || "";
+    const authorization =
+        req.headers.authorization ||
+        "";
 
 
     const token =
-        header.startsWith("Bearer ")
-        ? header.slice(7)
+        authorization.startsWith(
+            "Bearer "
+        )
+        ? authorization.substring(7)
         : "";
 
 
     if(
         !token ||
-        !adminSessions.has(token)
+        !sessions.has(token)
     ){
 
         return res
             .status(401)
             .json({
-                error:"Nicht autorisiert."
+                error:
+                    "Nicht angemeldet."
             });
 
     }
@@ -272,8 +287,8 @@ function adminErforderlich(
 
 
 /* =========================================================
-   HILFSFUNKTIONEN
-   ========================================================= */
+   ID
+========================================================= */
 
 function neueID(prefix){
 
@@ -281,19 +296,26 @@ function neueID(prefix){
         prefix +
         "_" +
         crypto
-            .randomBytes(10)
+            .randomBytes(12)
             .toString("hex")
     );
 
 }
 
 
-function normalisiereCode(code){
+/* =========================================================
+   CODE
+========================================================= */
 
-    return String(code || "")
-        .trim()
-        .toUpperCase()
-        .replace(/[^A-Z0-9-]/g,"");
+function normalisiereCode(
+    code
+){
+
+    return String(
+        code || ""
+    )
+    .trim()
+    .toUpperCase();
 
 }
 
@@ -309,12 +331,17 @@ function neuerPruefungscode(){
             "FW-" +
             Math.random()
                 .toString(36)
-                .substring(2,7)
+                .substring(
+                    2,
+                    7
+                )
                 .toUpperCase();
 
     }while(
         daten.pruefungen.some(
-            p => p.code === code
+            p =>
+                p.code ===
+                code
         )
     );
 
@@ -324,28 +351,59 @@ function neuerPruefungscode(){
 }
 
 
-function findePruefung(code){
+/* =========================================================
+   PRÜFUNG SUCHEN
+========================================================= */
+
+function findePruefung(
+    code
+){
+
+    const normal =
+        normalisiereCode(
+            code
+        );
+
 
     return daten.pruefungen.find(
         p =>
             p.code ===
-            normalisiereCode(code)
+            normal
     );
 
 }
 
 
-function clamp(
+/* =========================================================
+   BEGRENZEN
+========================================================= */
+
+function begrenzen(
     value,
     min,
     max
 ){
 
+    const nummer =
+        Number(value);
+
+
+    if(
+        !Number.isFinite(
+            nummer
+        )
+    ){
+
+        return min;
+
+    }
+
+
     return Math.min(
         max,
         Math.max(
             min,
-            Number(value)
+            nummer
         )
     );
 
@@ -353,8 +411,8 @@ function clamp(
 
 
 /* =========================================================
-   HEALTH
-   ========================================================= */
+   START
+========================================================= */
 
 app.get(
     "/",
@@ -369,16 +427,22 @@ app.get(
                 "online",
 
             ki:
-                Boolean(openai),
+                Boolean(
+                    openai
+                ),
 
             version:
-                "3.0"
+                "4.0"
 
         });
 
     }
 );
 
+
+/* =========================================================
+   GESUNDHEIT
+========================================================= */
 
 app.get(
     "/api/gesundheit",
@@ -389,7 +453,9 @@ app.get(
             ok:true,
 
             ki:
-                Boolean(openai),
+                Boolean(
+                    openai
+                ),
 
             pruefungen:
                 daten.pruefungen.length,
@@ -405,21 +471,32 @@ app.get(
 
 /* =========================================================
    ADMIN LOGIN
-   ========================================================= */
+========================================================= */
 
 app.post(
     "/api/admin/login",
     (req,res) => {
 
-        const {
-            email,
-            password
-        } = req.body || {};
+        const email =
+            String(
+                req.body?.email ||
+                ""
+            )
+            .trim();
+
+
+        const password =
+            String(
+                req.body?.password ||
+                ""
+            );
 
 
         if(
-            email !== ADMIN_EMAIL ||
-            password !== ADMIN_PASSWORD
+            email !==
+                ADMIN_EMAIL ||
+            password !==
+                ADMIN_PASSWORD
         ){
 
             return res
@@ -433,13 +510,14 @@ app.post(
 
 
         const token =
-            erstelleToken();
+            neuesToken();
 
 
-        adminSessions.set(
+        sessions.set(
             token,
             {
                 email,
+
                 createdAt:
                     Date.now()
             }
@@ -450,7 +528,10 @@ app.post(
 
             ok:true,
 
-            token
+            token,
+
+            email:
+                ADMIN_EMAIL
 
         });
 
@@ -460,30 +541,36 @@ app.post(
 
 /* =========================================================
    ADMIN DASHBOARD
-   ========================================================= */
+========================================================= */
 
 app.get(
     "/api/admin/dashboard",
     adminErforderlich,
     (req,res) => {
 
-        const gesamt =
-            daten.ergebnisse.length;
+        const ergebnisse =
+            daten.ergebnisse;
 
 
         const bestanden =
-            daten.ergebnisse.filter(
-                r => r.bestanden
+            ergebnisse.filter(
+                e =>
+                    e.bestanden
             ).length;
+
+
+        const gesamt =
+            ergebnisse.length;
 
 
         const quote =
             gesamt === 0
             ? 0
             : Math.round(
-                bestanden /
-                gesamt *
-                100
+                (
+                    bestanden /
+                    gesamt
+                ) * 100
             );
 
 
@@ -506,8 +593,8 @@ app.get(
 
 
 /* =========================================================
-   PRÜFUNGEN – ADMIN
-   ========================================================= */
+   ALLE PRÜFUNGEN
+========================================================= */
 
 app.get(
     "/api/admin/pruefungen",
@@ -526,8 +613,8 @@ app.get(
 
 
 /* =========================================================
-   PRÜFUNGEN – TEILNEHMER
-   ========================================================= */
+   PRÜFUNG FÜR TEILNEHMER
+========================================================= */
 
 app.get(
     "/api/pruefungen/code/:code",
@@ -545,30 +632,32 @@ app.get(
                 .status(404)
                 .json({
                     error:
-                        "Prüfung wurde nicht gefunden."
+                        "Prüfung nicht gefunden."
                 });
 
         }
 
 
         /*
-          Niemals die richtigen Antworten
-          an den Teilnehmer schicken.
+           LÖSUNGEN WERDEN ENTFERNT.
+           Der Teilnehmer darf niemals
+           die richtigen Antworten erhalten.
         */
 
-        const sichereFragen =
+        const fragen =
             pruefung.fragen.map(
                 frage => {
 
-                    const kopie = {
-                        ...frage
-                    };
+                    const sicher =
+                        {
+                            ...frage
+                        };
 
 
-                    delete kopie.loesung;
+                    delete sicher.loesung;
 
 
-                    return kopie;
+                    return sicher;
 
                 }
             );
@@ -596,8 +685,7 @@ app.get(
                 bestehensgrenze:
                     pruefung.bestehensgrenze,
 
-                fragen:
-                    sichereFragen
+                fragen
 
             }
 
@@ -608,8 +696,8 @@ app.get(
 
 
 /* =========================================================
-   KI PRÜFUNG ERSTELLEN
-   ========================================================= */
+   KI PRÜFUNG
+========================================================= */
 
 app.post(
     "/api/admin/ki/pruefung",
@@ -624,32 +712,62 @@ app.post(
                     .status(500)
                     .json({
                         error:
-                            "OPENAI_API_KEY wurde auf dem Server nicht eingerichtet."
+                            "OPENAI_API_KEY ist auf dem Backend nicht eingerichtet."
                     });
 
             }
 
 
-            const {
+            const material =
+                String(
+                    req.body?.material ||
+                    ""
+                ).trim();
 
-                material,
 
-                titel,
+            const titel =
+                String(
+                    req.body?.titel ||
+                    "Feuerwehr Prüfung"
+                ).trim();
 
-                fragen = 10,
 
-                schwierigkeit = "mittel",
+            const anzahl =
+                begrenzen(
+                    req.body?.fragen ||
+                    10,
+                    1,
+                    50
+                );
 
-                zeit = 30,
 
-                bestehen = 70
+            const schwierigkeit =
+                String(
+                    req.body?.schwierigkeit ||
+                    "mittel"
+                );
 
-            } = req.body || {};
+
+            const zeit =
+                begrenzen(
+                    req.body?.zeit ||
+                    30,
+                    1,
+                    180
+                );
+
+
+            const bestehen =
+                begrenzen(
+                    req.body?.bestehen ||
+                    70,
+                    1,
+                    100
+                );
 
 
             if(
-                typeof material !== "string" ||
-                material.trim().length < 50
+                material.length < 50
             ){
 
                 return res
@@ -662,98 +780,83 @@ app.post(
             }
 
 
-            const anzahl =
-                clamp(
-                    fragen,
-                    1,
-                    50
-                );
-
-
-            const zeitMinuten =
-                clamp(
-                    zeit,
-                    1,
-                    180
-                );
-
-
-            const bestehensgrenze =
-                clamp(
-                    bestehen,
-                    1,
-                    100
-                );
-
-
             const systemPrompt = `
 
 Du bist eine professionelle deutsche Feuerwehr-Ausbildungs-KI.
 
-Deine Aufgabe ist es, aus dem vom Ausbilder gelieferten
-Ausbildungsstoff eine realistische Feuerwehrprüfung zu erstellen.
+Erstelle aus dem gelieferten Ausbildungsstoff
+eine realistische Prüfung.
 
-WICHTIG:
+WICHTIGE REGELN:
 
-- Verwende ausschließlich Informationen aus dem gelieferten Ausbildungsstoff.
-- Erfinde keine Feuerwehrregeln.
-- Erfinde keine Gesetzesparagraphen.
-- Erfinde keine Einsatzvorschriften.
-- Wenn eine Information nicht im Material steht, frage sie nicht ab.
-- Die Prüfung soll fachlich verständlich formuliert sein.
-- Die Fragen sollen für eine echte Feuerwehr-Ausbildung geeignet sein.
-- Erstelle unterschiedliche Fragetypen.
-- Multiple Choice darf genau eine richtige Antwort haben.
-- Richtig/Falsch muss eindeutig sein.
-- Freitextfragen müssen anhand des Materials bewertbar sein.
+1. Verwende ausschließlich Informationen,
+   die im Ausbildungsstoff enthalten sind.
 
-Die Antwort muss ausschließlich valides JSON sein.
+2. Erfinde keine Fakten.
 
-JSON-Format:
+3. Erfinde keine Paragraphen.
+
+4. Erfinde keine Feuerwehrvorschriften.
+
+5. Keine Informationen aus dem Internet verwenden.
+
+6. Fragen müssen eindeutig sein.
+
+7. Verwende unterschiedliche Fragetypen.
+
+8. Multiple Choice:
+   genau eine Antwort ist richtig.
+
+9. Richtig/Falsch:
+   die Aussage muss eindeutig sein.
+
+10. Freitext:
+    eine Musterantwort angeben.
+
+11. Die Prüfung muss auf Deutsch sein.
+
+12. Erstelle genau ${anzahl} Fragen.
+
+Schwierigkeit:
+${schwierigkeit}
+
+Ausbildungsstoff:
+
+${material}
+
+Antworte ausschließlich mit JSON.
+
+Format:
 
 {
-  "beschreibung": "string",
+  "beschreibung": "Beschreibung der Prüfung",
   "fragen": [
     {
       "typ": "multiple",
-      "frage": "string",
+      "frage": "Frage",
       "optionen": [
-        "string",
-        "string",
-        "string",
-        "string"
+        "Antwort A",
+        "Antwort B",
+        "Antwort C",
+        "Antwort D"
       ],
       "loesung": 0,
       "punkte": 1
     },
     {
       "typ": "truefalse",
-      "frage": "string",
+      "frage": "Aussage",
       "loesung": true,
       "punkte": 1
     },
     {
       "typ": "text",
-      "frage": "string",
-      "loesung": "string",
+      "frage": "Frage",
+      "loesung": "Musterantwort",
       "punkte": 2
     }
   ]
 }
-
-Bei multiple ist "loesung" der Index der richtigen Antwort.
-
-Bei truefalse ist "loesung" true oder false.
-
-Bei text ist "loesung" eine Musterantwort.
-
-Erstelle genau ${anzahl} Fragen.
-
-Schwierigkeit:
-${schwierigkeit}
-
-Ausbildungsstoff:
-${material}
 
 `;
 
@@ -766,23 +869,27 @@ ${material}
 
                     input:[
                         {
-                            role:"system",
+                            role:
+                                "system",
 
                             content:
                                 systemPrompt
+
                         },
 
                         {
-                            role:"user",
+                            role:
+                                "user",
 
                             content:
-                                "Erstelle jetzt die Prüfung als JSON."
+                                "Erstelle jetzt die Prüfung."
                         }
                     ],
 
                     text:{
                         format:{
-                            type:"json_object"
+                            type:
+                                "json_object"
                         }
                     }
 
@@ -802,23 +909,26 @@ ${material}
             }
 
 
-            let kiDaten;
+            let ki;
 
 
             try{
 
-                kiDaten =
-                    JSON.parse(raw);
+                ki =
+                    JSON.parse(
+                        raw
+                    );
 
             }catch(error){
 
                 console.error(
-                    "KI JSON:",
+                    "Ungültige KI-Antwort:",
                     raw
                 );
 
+
                 throw new Error(
-                    "Die KI hat kein gültiges JSON zurückgegeben."
+                    "Die KI hat kein gültiges JSON erzeugt."
                 );
 
             }
@@ -826,38 +936,76 @@ ${material}
 
             if(
                 !Array.isArray(
-                    kiDaten.fragen
+                    ki.fragen
                 )
             ){
 
                 throw new Error(
-                    "Die KI hat keine gültigen Fragen erstellt."
+                    "Die KI hat keine Fragen erzeugt."
                 );
 
             }
 
 
-            const validierteFragen =
-                kiDaten.fragen
-                    .slice(0,anzahl)
+            const fragen =
+                ki.fragen
+                    .slice(
+                        0,
+                        anzahl
+                    )
                     .map(
                         (frage,index) => {
 
+                            const typ =
+                                [
+                                    "multiple",
+                                    "truefalse",
+                                    "text"
+                                ].includes(
+                                    frage.typ
+                                )
+                                ? frage.typ
+                                : "text";
+
+
                             if(
-                                frage.typ === "multiple"
+                                typ ===
+                                "multiple"
                             ){
 
-                                const optionen =
+                                let optionen =
                                     Array.isArray(
                                         frage.optionen
                                     )
-                                    ? frage.optionen
-                                        .slice(0,4)
+                                    ?
+                                    frage.optionen
+                                        .slice(
+                                            0,
+                                            4
+                                        )
                                         .map(
                                             x =>
-                                                String(x)
+                                                String(
+                                                    x
+                                                )
                                         )
-                                    : [];
+                                    :
+                                    [];
+
+
+                                if(
+                                    optionen.length <
+                                    2
+                                ){
+
+                                    optionen = [
+                                        "Antwort A",
+                                        "Antwort B",
+                                        "Antwort C",
+                                        "Antwort D"
+                                    ];
+
+                                }
 
 
                                 let loesung =
@@ -867,22 +1015,16 @@ ${material}
 
 
                                 if(
-                                    optionen.length < 2
-                                ){
-
-                                    throw new Error(
-                                        `Frage ${index+1} hat zu wenige Antwortmöglichkeiten.`
-                                    );
-
-                                }
-
-
-                                if(
+                                    !Number.isInteger(
+                                        loesung
+                                    ) ||
                                     loesung < 0 ||
-                                    loesung >= optionen.length
+                                    loesung >=
+                                        optionen.length
                                 ){
 
-                                    loesung = 0;
+                                    loesung =
+                                        0;
 
                                 }
 
@@ -890,9 +1032,12 @@ ${material}
                                 return {
 
                                     id:
-                                        neueID("frage"),
+                                        neueID(
+                                            "frage"
+                                        ),
 
                                     typ:
+
                                         "multiple",
 
                                     frage:
@@ -906,8 +1051,9 @@ ${material}
                                     loesung,
 
                                     punkte:
-                                        clamp(
-                                            frage.punkte || 1,
+                                        begrenzen(
+                                            frage.punkte ||
+                                            1,
                                             1,
                                             10
                                         )
@@ -918,13 +1064,16 @@ ${material}
 
 
                             if(
-                                frage.typ === "truefalse"
+                                typ ===
+                                "truefalse"
                             ){
 
                                 return {
 
                                     id:
-                                        neueID("frage"),
+                                        neueID(
+                                            "frage"
+                                        ),
 
                                     typ:
                                         "truefalse",
@@ -941,8 +1090,9 @@ ${material}
                                         ),
 
                                     punkte:
-                                        clamp(
-                                            frage.punkte || 1,
+                                        begrenzen(
+                                            frage.punkte ||
+                                            1,
                                             1,
                                             10
                                         )
@@ -955,7 +1105,9 @@ ${material}
                             return {
 
                                 id:
-                                    neueID("frage"),
+                                    neueID(
+                                        "frage"
+                                    ),
 
                                 typ:
                                     "text",
@@ -973,8 +1125,9 @@ ${material}
                                     ),
 
                                 punkte:
-                                    clamp(
-                                        frage.punkte || 2,
+                                    begrenzen(
+                                        frage.punkte ||
+                                        2,
                                         1,
                                         10
                                     )
@@ -986,11 +1139,11 @@ ${material}
 
 
             if(
-                validierteFragen.length === 0
+                fragen.length === 0
             ){
 
                 throw new Error(
-                    "Es konnten keine Fragen erstellt werden."
+                    "Keine gültigen Fragen erzeugt."
                 );
 
             }
@@ -999,33 +1152,31 @@ ${material}
             const pruefung = {
 
                 id:
-                    neueID("pruefung"),
+                    neueID(
+                        "pruefung"
+                    ),
 
                 code:
                     neuerPruefungscode(),
 
-                titel:
-                    String(
-                        titel ||
-                        "Feuerwehr Prüfung"
-                    ),
+                titel,
 
                 beschreibung:
                     String(
-                        kiDaten.beschreibung ||
+                        ki.beschreibung ||
                         "Automatisch mit der Feuerwehr-KI erstellt."
                     ),
 
-                zeit:
-                    zeitMinuten,
+                zeit,
 
-                bestehensgrenze,
+                bestehensgrenze:
+                    bestehen,
 
-                fragen:
-                    validierteFragen,
+                fragen,
 
                 createdAt:
-                    new Date().toISOString()
+                    new Date()
+                        .toISOString()
 
             };
 
@@ -1070,8 +1221,8 @@ ${material}
 
 
 /* =========================================================
-   ERGEBNIS ABGEBEN
-   ========================================================= */
+   PRÜFUNG ABGEBEN
+========================================================= */
 
 app.post(
     "/api/teilnehmer/abgabe",
@@ -1106,7 +1257,7 @@ app.post(
                     .status(404)
                     .json({
                         error:
-                            "Prüfung wurde nicht gefunden."
+                            "Prüfung nicht gefunden."
                     });
 
             }
@@ -1129,7 +1280,9 @@ app.post(
 
 
             if(
-                !Array.isArray(antworten)
+                !Array.isArray(
+                    antworten
+                )
             ){
 
                 return res
@@ -1150,133 +1303,161 @@ app.post(
             const bewertung = [];
 
 
-            pruefung.fragen.forEach(
-                (frage,index) => {
+            pruefung.fragen
+                .forEach(
+                    (frage,index) => {
 
-                    const antwort =
-                        antworten[index] ?? "";
-
-
-                    const fragePunkte =
-                        Number(
-                            frage.punkte || 1
-                        );
+                        const antwort =
+                            antworten[index] ??
+                            "";
 
 
-                    maxPunkte +=
-                        fragePunkte;
-
-
-                    let richtig = false;
-
-                    let erhalten = 0;
-
-
-                    if(
-                        frage.typ === "multiple"
-                    ){
-
-                        const gegeben =
+                        const fragePunkte =
                             Number(
-                                antwort
+                                frage.punkte ||
+                                1
                             );
 
 
-                        richtig =
-                            gegeben ===
-                            Number(
-                                frage.loesung
-                            );
+                        maxPunkte +=
+                            fragePunkte;
 
 
-                        if(richtig){
-
-                            erhalten =
-                                fragePunkte;
-
-                        }
-
-                    }
+                        let richtig =
+                            false;
 
 
-                    else if(
-                        frage.typ === "truefalse"
-                    ){
+                        let erhalten =
+                            0;
 
-                        const gegeben =
-                            String(
-                                antwort
-                            ).toLowerCase() ===
-                            "true";
-
-
-                        richtig =
-                            gegeben ===
-                            Boolean(
-                                frage.loesung
-                            );
-
-
-                        if(richtig){
-
-                            erhalten =
-                                fragePunkte;
-
-                        }
-
-                    }
-
-
-                    else if(
-                        frage.typ === "text"
-                    ){
 
                         /*
-                           Freitextfragen werden hier
-                           zunächst nicht automatisch
-                           als richtig bewertet.
-
-                           Sie können vom Ausbilder
-                           später kontrolliert werden.
+                           MULTIPLE CHOICE
                         */
 
-                        richtig = false;
+                        if(
+                            frage.typ ===
+                            "multiple"
+                        ){
 
-                        erhalten = 0;
+                            richtig =
+                                Number(
+                                    antwort
+                                ) ===
+                                Number(
+                                    frage.loesung
+                                );
+
+
+                            if(richtig){
+
+                                erhalten =
+                                    fragePunkte;
+
+                            }
+
+                        }
+
+
+                        /*
+                           RICHTIG / FALSCH
+                        */
+
+                        else if(
+                            frage.typ ===
+                            "truefalse"
+                        ){
+
+                            const gegeben =
+                                String(
+                                    antwort
+                                ).toLowerCase()
+                                ===
+                                "true";
+
+
+                            richtig =
+                                gegeben ===
+                                Boolean(
+                                    frage.loesung
+                                );
+
+
+                            if(richtig){
+
+                                erhalten =
+                                    fragePunkte;
+
+                            }
+
+                        }
+
+
+                        /*
+                           FREITEXT
+                        */
+
+                        else if(
+                            frage.typ ===
+                            "text"
+                        ){
+
+                            /*
+                               Freitext wird gespeichert
+                               und zunächst nicht automatisch
+                               als richtig gewertet.
+                            */
+
+                            richtig =
+                                false;
+
+                            erhalten =
+                                0;
+
+                        }
+
+
+                        punkte +=
+                            erhalten;
+
+
+                        bewertung.push({
+
+                            frage:
+                                frage.frage,
+
+                            typ:
+                                frage.typ,
+
+                            antwort:
+                                String(
+                                    antwort
+                                ),
+
+                            richtig,
+
+                            erhalten,
+
+                            max:
+                                fragePunkte,
+
+                            musterantwort:
+                                frage.loesung
+
+                        });
 
                     }
-
-
-                    punkte +=
-                        erhalten;
-
-
-                    bewertung.push({
-
-                        frage:
-                            frage.frage,
-
-                        antwort,
-
-                        richtig,
-
-                        erhalten,
-
-                        max:
-                            fragePunkte
-
-                    });
-
-                }
-            );
+                );
 
 
             const prozent =
                 maxPunkte === 0
                 ? 0
                 : Math.round(
-                    punkte /
-                    maxPunkte *
+                    (
+                        punkte /
+                        maxPunkte
+                    ) *
                     100
                 );
 
@@ -1291,7 +1472,9 @@ app.post(
             const ergebnis = {
 
                 id:
-                    neueID("ergebnis"),
+                    neueID(
+                        "ergebnis"
+                    ),
 
                 pruefungId:
                     pruefung.id,
@@ -1303,13 +1486,19 @@ app.post(
                     pruefung.titel,
 
                 vorname:
-                    String(vorname),
+                    String(
+                        vorname
+                    ),
 
                 nachname:
-                    String(nachname),
+                    String(
+                        nachname
+                    ),
 
                 feuerwehr:
-                    String(feuerwehr),
+                    String(
+                        feuerwehr
+                    ),
 
                 punkte,
 
@@ -1324,18 +1513,9 @@ app.post(
 
                 bewertung,
 
-                status:
-                    bewertung.some(
-                        x =>
-                            x.frage &&
-                            !x.richtig &&
-                            x.max > 1
-                    )
-                    ? "automatisch"
-                    : "automatisch",
-
                 createdAt:
-                    new Date().toISOString()
+                    new Date()
+                        .toISOString()
 
             };
 
@@ -1369,7 +1549,7 @@ app.post(
                 .status(500)
                 .json({
                     error:
-                        "Die Prüfung konnte nicht gespeichert werden."
+                        "Prüfung konnte nicht gespeichert werden."
                 });
 
         }
@@ -1380,7 +1560,7 @@ app.post(
 
 /* =========================================================
    ADMIN ERGEBNISSE
-   ========================================================= */
+========================================================= */
 
 app.get(
     "/api/admin/ergebnisse",
@@ -1388,12 +1568,18 @@ app.get(
     (req,res) => {
 
         const ergebnisse =
-            [...daten.ergebnisse]
-                .sort(
-                    (a,b) =>
-                        new Date(b.createdAt) -
-                        new Date(a.createdAt)
-                );
+            [
+                ...daten.ergebnisse
+            ]
+            .sort(
+                (a,b) =>
+                    new Date(
+                        b.createdAt
+                    ) -
+                    new Date(
+                        a.createdAt
+                    )
+            );
 
 
         res.json({
@@ -1408,7 +1594,7 @@ app.get(
 
 /* =========================================================
    404
-   ========================================================= */
+========================================================= */
 
 app.use(
     (req,res) => {
@@ -1425,47 +1611,23 @@ app.use(
 
 
 /* =========================================================
-   FEHLER
-   ========================================================= */
-
-app.use(
-    (error,req,res,next) => {
-
-        console.error(
-            "Serverfehler:",
-            error
-        );
-
-
-        res
-            .status(500)
-            .json({
-                error:
-                    "Interner Serverfehler."
-            });
-
-    }
-);
-
-
-/* =========================================================
-   SERVER START
-   ========================================================= */
+   SERVER
+========================================================= */
 
 app.listen(
     PORT,
     () => {
 
         console.log(
-            "======================================"
+            "========================================"
         );
 
         console.log(
-            "🚒 Feuerwehr Prüfungsplattform"
+            "🚒 FEUERWEHR PRÜFUNGSPLATTFORM"
         );
 
         console.log(
-            "======================================"
+            "========================================"
         );
 
         console.log(
@@ -1476,22 +1638,27 @@ app.listen(
         console.log(
             "KI:",
             openai
-                ? "AKTIV"
-                : "NICHT KONFIGURIERT"
+            ? "AKTIV"
+            : "NICHT KONFIGURIERT"
         );
 
         console.log(
-            "Modell:",
+            "KI-Modell:",
             OPENAI_MODEL
         );
 
         console.log(
-            "Datenbank:",
+            "Ausbilder:",
+            ADMIN_EMAIL
+        );
+
+        console.log(
+            "Daten:",
             DATA_FILE
         );
 
         console.log(
-            "======================================"
+            "========================================"
         );
 
     }
